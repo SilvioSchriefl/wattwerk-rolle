@@ -53,7 +53,7 @@ input[type=file]::file-selector-button{background:#16212B;color:var(--ink);borde
 <div id="env"></div>
 <div class="card"><div class="row sp"><h2>Geräte</h2></div>
  <div class="row" style="margin-top:8px">
-  <button id="bTr">Rolle verbinden</button><span><span class="dot" id="dTr"></span><span id="sTr">nicht verbunden</span></span>
+  <button id="bTr">Rolle verbinden</button><button class="g" id="bTrAll" title="Zeigt alle Bluetooth-Geräte in der Nähe">Rolle nicht in der Liste?</button><span><span class="dot" id="dTr"></span><span id="sTr">nicht verbunden</span></span>
  </div>
  <div class="row" style="margin-top:8px">
   <button class="g" id="bHr">Pulsgurt verbinden (optional)</button><span><span class="dot" id="dHr"></span><span id="sHr">nicht verbunden</span></span>
@@ -182,13 +182,15 @@ function onFEC(e){const v=new Uint8Array(e.target.value.buffer.slice(e.target.va
  else if(pg===0x10){const h=pl[6];if(!hrDev&&h&&h!==0xFF){D.h=h;D.ht=Date.now()}}}
 async function fecw(w){if(!cp)return false;const u=Math.max(0,Math.min(16000,Math.round(w*4))),m=[0xA4,0x09,0x4F,0x05,0x31,0xFF,0xFF,0xFF,0xFF,0xFF,u&255,(u>>8)&255];m.push(m.reduce((a,b)=>a^b,0));
  try{const v=new Uint8Array(m);if(cp.writeValueWithoutResponse)await cp.writeValueWithoutResponse(v);else await cp.writeValue(v);return true}catch(e){try{await cp.writeValue(new Uint8Array(m));return true}catch(x){return false}}}
-async function connectTr(){
+async function connectTr(all){
  try{
-  const dev=await BT.requestDevice({filters:[{services:[0x1826]},{namePrefix:"Tacx"},{services:[FEC]}],optionalServices:[0x1826,FEC]});
+  const dev=await BT.requestDevice(all===true?{acceptAllDevices:true,optionalServices:[0x1826,FEC,0x1818]}:{filters:[{services:[0x1826]},{namePrefix:"Tacx"},{namePrefix:"NEO"},{namePrefix:"Neo"},{services:[FEC]}],optionalServices:[0x1826,FEC,0x1818]});
   setTr(false,"verbinde …");
   dev.addEventListener("gattserverdisconnected",()=>{cp=null;ctl=false;setTr(false,"Verbindung verloren");toast("Rolle getrennt. Verbinde sie neu, die Einheit läuft weiter.",true)});
   const srv=await dev.gatt.connect();let fm=null;try{fm=await srv.getPrimaryService(0x1826)}catch(x){fm=null}
-  if(!fm){let fs=null;try{fs=await srv.getPrimaryService(FEC)}catch(x){}if(!fs){try{srv.disconnect&&srv.disconnect()}catch(x){}throw new Error("Diese Rolle bietet weder FTMS noch die Tacx-Schnittstelle über Bluetooth.")}
+  if(!fm){let fs=null;try{fs=await srv.getPrimaryService(FEC)}catch(x){}if(!fs){let cps=null;try{cps=await srv.getPrimaryService(0x1818)}catch(x){}
+    if(cps){const ch=await cps.getCharacteristic(0x2A63);ch.addEventListener("characteristicvaluechanged",e=>{const v=e.target.value;if(v.byteLength>=4){D.p=v.getInt16(2,true);D.pt=Date.now()}});await ch.startNotifications();proto="cps";cp=null;ctl=false;tr=dev;setTr(true,(dev.name||"Gerät")+" · nur Leistungsanzeige");toast("Verbunden, aber dieses Gerät lässt sich nicht steuern (kein ERG). Gerätename: "+(dev.name||"unbekannt"),true);return}
+    try{srv.disconnect&&srv.disconnect()}catch(x){}throw new Error("„"+(dev.name||"Gerät")+"“ bietet weder FTMS noch die Tacx-Schnittstelle. Ist es wirklich die Rolle?")}
    proto="fec";const rx=await fs.getCharacteristic(FEC_RX);rx.addEventListener("characteristicvaluechanged",onFEC);await rx.startNotifications();cp=await fs.getCharacteristic(FEC_TX);range={min:0,max:4000};ctl=true;tr=dev;
    setTr(true,(dev.name||"Tacx")+" · ERG bereit (Tacx-Modus)");toast("Rolle verbunden.");if(run&&!run.paused)sendTarget(true);return}
   proto="ftms";
@@ -357,7 +359,7 @@ ${tp}
 function rawCsv(){return"sekunde,watt,trittfrequenz,puls\n"+run.rec.map((r,i)=>[i+1,r[0],Math.round(r[1]),r[2]].join(",")).join("\n")+"\n"}
 function dl(fn,txt,type,quiet){const u=URL.createObjectURL(new Blob([txt],{type}));const a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);if(!quiet)toast("Gespeichert: "+fn)}
 
-$("#bTr").onclick=connectTr;$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);$("#bDry").onclick=()=>start(true);
+$("#bTr").onclick=()=>connectTr(false);$("#bTrAll").onclick=()=>connectTr(true);$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);$("#bDry").onclick=()=>start(true);
 $("#bPause").onclick=pause;$("#bUp").onclick=()=>adj(.05);$("#bDown").onclick=()=>adj(-.05);$("#bSkip").onclick=skip;
 $("#bEnd").onclick=()=>{if(run&&!run.over&&confirmEnd())finish()};
 let endArm=0;function confirmEnd(){if(Date.now()-endArm<3000)return true;endArm=Date.now();toast("Nochmal tippen zum Beenden.");return false}
