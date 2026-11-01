@@ -68,6 +68,13 @@ body.riding #hdr,body.riding #env,body.riding #dev,body.riding #setup,body.ridin
 .okc circle{stroke-width:3;stroke-dasharray:151;stroke-dashoffset:151;animation:draw .7s ease-out forwards}
 .okc path{stroke-width:4;stroke-dasharray:36;stroke-dashoffset:36;animation:draw .35s .6s ease-out forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
+button.d{background:none;color:var(--bad);border:1px solid var(--bad)}
+#sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+#sheet.on{opacity:1;pointer-events:auto}
+#sheet .box{background:var(--sf);border:1px solid var(--ln2);border-bottom:0;border-radius:22px 22px 0 0;padding:20px 16px calc(18px + env(safe-area-inset-bottom));width:100%;max-width:520px;transform:translateY(40px);transition:transform .22s ease-out}
+#sheet.on .box{transform:none}#sheet h2{margin:0 0 6px}#sheet p{margin:0 0 6px}
+#sheet .box button{display:block;width:100%;margin-top:10px;min-height:54px;font-size:17px}
+@media (prefers-reduced-motion:reduce){#sheet,#sheet .box{transition:none}}
 @media (prefers-reduced-motion:reduce){#gFill::after,#pDot,.m.soon,.m.pop{animation:none!important}.okc circle,.okc path{animation:none;stroke-dashoffset:0}}
 #toast.show{opacity:1}#toast.err{background:var(--bad);color:#fff}
 </style></head><body>
@@ -129,6 +136,7 @@ body.riding #hdr,body.riding #env,body.riding #dev,body.riding #setup,body.ridin
  <p class="mut">Die Rolle kann immer nur mit einer App verbunden sein. Schließe MyWhoosh, Zwift oder die Tacx-App vorher. Hör im ERG-Modus nicht abrupt auf zu treten: Bei Pause senkt die Seite das Ziel auf 40 % der FTP.</p>
 </div>
 </main>
+<div id="sheet" role="dialog" aria-modal="true"><div class="box"></div></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <script>
 const $=s=>document.querySelector(s);
@@ -373,11 +381,12 @@ function finish(){if(!run||run.over)return;run.over=true;clearInterval(run.iv);c
  $("#done").innerHTML=`<div class="card"><svg class="okc" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-15"/></svg><h2>Geschafft: ${esc(W.name)}</h2><p class="mut">${run.dry?"Probelauf ohne Rolle, die Werte sind leer.":"Das Ziel ist auf 40 % der FTP gesenkt. Rolle locker ausrollen."}</p>
  <div class="sum"><div><b>${mmss(R.length)}</b><span class="mut">Dauer</span></div><div><b>${Math.round(avg)} W</b><span class="mut">Ø Leistung</span></div><div><b>${Math.round(N)} W</b><span class="mut">NP</span></div>
  <div><b>${Math.round(tss)}</b><span class="mut">TSS</span></div><div><b>${ac?Math.round(ac):"–"}</b><span class="mut">Ø Trittfrequenz</span></div><div><b>${ah?Math.round(ah):"–"}</b><span class="mut">Ø Puls</span></div></div>
- <div class="row" style="margin-top:12px">${run.dry?"":svOn()?`<button id="bStr">Zu Strava hochladen</button><button class="g" id="bTcx">.tcx speichern</button>`:`<button id="bTcx">Für Strava speichern (.tcx)</button>`}<button class="g" id="bCsv">Nur für Wattwerk (.csv)</button><button class="g" id="bRaw">Sekundendaten (.csv)</button><button class="g" id="bNew">Neue Einheit</button></div>
+ <div class="row" style="margin-top:12px">${run.dry?"":svOn()?`<button id="bStr">Zu Strava hochladen</button><button class="g" id="bTcx">.tcx speichern</button>`:`<button id="bTcx">Für Strava speichern (.tcx)</button>`}<button class="g" id="bCsv">Nur für Wattwerk (.csv)</button><button class="g" id="bRaw">Sekundendaten (.csv)</button><button class="g" id="bNew">Neue Einheit</button><button class="d" id="bDrop">Fahrt verwerfen</button></div>
  <p class="mut" id="upInfo"></p><p class="mut">${run.dry||svOn()?"":`<b style="color:var(--ink)">Zu Strava:</b> Datei speichern, dann in Chrome strava.com/upload/select öffnen (auf dem Handy im Menü ⋮ „Desktopwebsite“ einschalten), die .tcx-Datei auswählen und als Sportart „Virtuelle Radfahrt“ wählen. Danach holt der Strava-Knopf in Wattwerk die Fahrt automatisch. Die .csv brauchst du dann nicht, sonst steht die Fahrt doppelt im Log. `}Die .csv ist nur für den Fall gedacht, dass die Fahrt nicht zu Strava soll.</p></div>`;
  countUp($("#done"));const bu=$("#bStr");if(bu)bu.onclick=()=>svUpload(bu,$("#upInfo"));
  const bt=$("#bTcx");if(bt)bt.onclick=()=>dl(`wattwerk-rolle-${stamp()}.tcx`,tcx(),"application/vnd.garmin.tcx+xml");
  $("#bCsv").onclick=()=>dl(`wattwerk-rolle-${stamp()}.csv`,wwCsv(),"text/csv");$("#bRaw").onclick=()=>dl(`rolle-sekunden-${stamp()}.csv`,rawCsv(),"text/csv");
+ $("#bDrop").onclick=async()=>{if(!run)return;const v=await sheet("Fahrt verwerfen?",run.up?"Die Fahrt verschwindet hier. Auf Strava ist sie schon hochgeladen, dort musst du sie selbst löschen.":"Die Daten dieser Fahrt gehen verloren. Nichts wird gespeichert oder hochgeladen.",[{t:"Verwerfen",c:"d",v:1},{t:"Abbrechen",c:"g",v:0}]);if(v&&run){$("#bNew").click();toast("Fahrt verworfen.")}};
  $("#bNew").onclick=()=>{$("#done").hidden=true;$("#setup").hidden=false;$("#exp").hidden=false;$("#svc").hidden=false;run=null;document.body.classList.remove("riding");window.scrollTo(0,0);if(history.state&&history.state.ride){NOPOP=true;history.back()}}}
 function countUp(root){try{if(matchMedia("(prefers-reduced-motion: reduce)").matches)return}catch(e){}root.querySelectorAll(".sum b").forEach(b=>{const m=b.textContent.match(/^(\d+)( W)?$/);if(!m)return;const v=+m[1],u=m[2]||"",t0=performance.now();b.textContent="0"+u;const st=n=>{const k=Math.min(1,(n-t0)/900);b.textContent=Math.round(v*(1-Math.pow(1-k,3)))+u;if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)})}
 const stamp=()=>{const d=run.started;return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())};
@@ -395,11 +404,15 @@ function rawCsv(){return"sekunde,watt,trittfrequenz,puls\n"+run.rec.map((r,i)=>[
 function dl(fn,txt,type,quiet){const u=URL.createObjectURL(new Blob([txt],{type}));const a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);if(!quiet)toast("Gespeichert: "+fn)}
 
 $("#bTr").onclick=()=>connectTr(false);$("#bRe").onclick=()=>connectTr(false);
-let NOPOP=false;addEventListener("popstate",()=>{if(NOPOP){NOPOP=false;return}if(run&&!run.over){try{history.pushState({ride:1},"")}catch(x){}toast("Zum Beenden unten auf „Beenden“ tippen.")}else if(document.body.classList.contains("riding")){const b=$("#bNew");if(b)b.click()}});$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);$("#bDry").onclick=()=>start(true);
+let NOPOP=false;addEventListener("popstate",()=>{if(NOPOP){NOPOP=false;return}if(SHEET){SHEET(null);try{history.pushState({ride:1},"")}catch(x){}return}if(run&&!run.over){try{history.pushState({ride:1},"")}catch(x){}toast("Zum Beenden unten auf „Beenden“ tippen.")}else if(document.body.classList.contains("riding")){const b=$("#bNew");if(b)b.click()}});$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);$("#bDry").onclick=()=>start(true);
 $("#bPause").onclick=pause;$("#bUp").onclick=()=>adj(.05);$("#bDown").onclick=()=>adj(-.05);$("#bSkip").onclick=skip;
-$("#bEnd").onclick=()=>{if(run&&!run.over&&confirmEnd())finish()};
-let endArm=0;function confirmEnd(){if(Date.now()-endArm<3000)return true;endArm=Date.now();toast("Nochmal tippen zum Beenden.");return false}
-addEventListener("keydown",e=>{if(!run||run.over||e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;if(e.code==="Space"){e.preventDefault();pause()}else if(e.key==="ArrowUp"){e.preventDefault();adj(.05)}else if(e.key==="ArrowDown"){e.preventDefault();adj(-.05)}else if(e.key==="ArrowRight"){e.preventDefault();skip()}});
+let SHEET=null;function sheet(title,text,btns){if(SHEET)SHEET(null);return new Promise(res=>{const s=$("#sheet");s.querySelector(".box").innerHTML=`<h2>${esc(title)}</h2>${text?`<p class="mut">${esc(text)}</p>`:""}`+btns.map((b,i)=>`<button class="${b.c||""}" data-i="${i}">${esc(b.t)}</button>`).join("");
+ SHEET=v=>{s.classList.remove("on");SHEET=null;res(v)};s.querySelectorAll("button").forEach(x=>x.onclick=()=>SHEET&&SHEET(btns[+x.dataset.i].v));s.onclick=e=>{if(e.target===s&&SHEET)SHEET(null)};s.classList.add("on");const f=s.querySelector("button");f&&f.focus({preventScroll:true})})}
+function discard(){if(!run||run.over)return;run.over=true;clearInterval(run.iv);cancelAnimationFrame(RAF);RAF=0;try{wl&&wl.release()}catch(e){}if(!run.dry&&cp)setPower(Math.round(run.ftp*.4),true);
+ $("#ride").hidden=true;$("#setup").hidden=false;$("#exp").hidden=false;$("#svc").hidden=false;run=null;document.body.classList.remove("riding");window.scrollTo(0,0);if(history.state&&history.state.ride){NOPOP=true;history.back()}toast("Einheit verworfen.")}
+$("#bEnd").onclick=async()=>{if(!run||run.over)return;const v=await sheet("Einheit beenden?",`Bisher ${mmss(run.rec.length)} gefahren.`,[{t:"Beenden und auswerten",v:"end"},{t:"Einheit verwerfen",c:"d",v:"drop"},{t:"Weiterfahren",c:"g",v:null}]);if(!run||run.over)return;
+ if(v==="end")finish();else if(v==="drop"){const w=await sheet("Wirklich verwerfen?","Die Fahrt wird nicht gespeichert und nicht hochgeladen.",[{t:"Verwerfen",c:"d",v:1},{t:"Weiterfahren",c:"g",v:0}]);if(w&&run&&!run.over)discard()}};
+addEventListener("keydown",e=>{if(SHEET){if(e.key==="Escape"){e.preventDefault();SHEET(null)}return}if(!run||run.over||e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;if(e.code==="Space"){e.preventDefault();pause()}else if(e.key==="ArrowUp"){e.preventDefault();adj(.05)}else if(e.key==="ArrowDown"){e.preventDefault();adj(-.05)}else if(e.key==="ArrowRight"){e.preventDefault();skip()}});
 addEventListener("beforeunload",e=>{if(run&&!run.over){e.preventDefault();e.returnValue=""}});
 </script>
 <script>if("serviceWorker" in navigator&&window.isSecureContext)navigator.serviceWorker.register("sw.js").catch(()=>{})</script></body></html>
