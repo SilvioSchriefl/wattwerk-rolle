@@ -46,14 +46,16 @@ input[type=file]::file-selector-button{background:#16212B;color:var(--ink);borde
 .sum b{display:block;font:700 30px "Barlow Condensed",system-ui,sans-serif}
 @media(max-width:700px){.dash{grid-template-columns:repeat(2,1fr)}.m.big .num{font-size:84px}.m .num{font-size:40px}.sum{grid-template-columns:repeat(2,1fr)}}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+body.riding #hdr,body.riding #env,body.riding #dev,body.riding #setup,body.riding #exp,body.riding #svc,body.riding #hint{display:none!important}
+@media (pointer:coarse){.kbd{display:none}}
 #toast.show{opacity:1}#toast.err{background:var(--bad);color:#fff}
 </style></head><body>
 <main>
-<div class="row sp"><h1>Wattwerk Rolle</h1><span class="mut">ERG-Steuerung über Bluetooth (FTMS)</span></div>
+<div class="row sp" id="hdr"><h1>Wattwerk Rolle</h1><span class="mut">ERG-Steuerung über Bluetooth</span></div>
 <div id="env"></div>
-<div class="card"><div class="row sp"><h2>Geräte</h2></div>
+<div class="card" id="dev"><div class="row sp"><h2>Geräte</h2></div>
  <div class="row" style="margin-top:8px">
-  <button id="bTr">Rolle verbinden</button><button class="g" id="bTrAll" title="Zeigt alle Bluetooth-Geräte in der Nähe">Rolle nicht in der Liste?</button><span><span class="dot" id="dTr"></span><span id="sTr">nicht verbunden</span></span>
+  <button id="bTr">Rolle verbinden</button><span><span class="dot" id="dTr"></span><span id="sTr">nicht verbunden</span></span>
  </div>
  <div class="row" style="margin-top:8px">
   <button class="g" id="bHr">Pulsgurt verbinden (optional)</button><span><span class="dot" id="dHr"></span><span id="sHr">nicht verbunden</span></span>
@@ -76,6 +78,7 @@ input[type=file]::file-selector-button{background:#16212B;color:var(--ink);borde
  <div class="row"><button class="g" id="bFit">Garmin (.fit)</button><button class="g" id="bZw">Zwift (.zwo)</button><button class="g" id="bAll" hidden>Ganzen Plan als .fit</button></div>
 </div>
 <div id="ride" hidden>
+ <div class="row sp" style="margin-bottom:6px"><span class="mut"><span class="dot" id="rDot"></span><span id="rTr">Rolle nicht verbunden</span></span><button class="g" id="bRe" hidden>Rolle neu verbinden</button></div>
  <div class="row sp"><h2 id="rName"></h2><span class="mut" id="rState"></span></div>
  <div class="dash">
   <div class="m big"><div class="num" id="vP">–</div><div class="lab">Leistung (W, 3 s)</div></div>
@@ -95,11 +98,11 @@ input[type=file]::file-selector-button{background:#16212B;color:var(--ink);borde
   <button class="g" id="bSkip">Abschnitt überspringen</button>
   <button class="g" id="bEnd">Beenden</button>
  </div>
- <p class="mut">Tastatur: Leertaste Pause, Pfeil hoch/runter Intensität, Pfeil rechts nächster Abschnitt.</p>
+ <p class="mut kbd">Tastatur: Leertaste Pause, Pfeil hoch/runter Intensität, Pfeil rechts nächster Abschnitt.</p>
 </div>
 <div id="done" hidden></div>
 <div class="card" id="svc"></div>
-<div class="card"><h3>Hinweise</h3>
+<div class="card" id="hint"><h3>Hinweise</h3>
  <p class="mut">Die Seite steuert Rollen, die den Bluetooth-Standard FTMS unterstützen. Viele neuere Tacx-Rollen tun das mit aktueller Firmware; prüfe im Zweifel ein Update in der Tacx-App. Erscheint deine Rolle beim Verbinden nicht in der Liste, unterstützt sie FTMS nicht, dann fahre die Einheit über MyWhoosh oder Zwift.</p>
  <p class="mut">Die Rolle kann immer nur mit einer App verbunden sein. Schließe MyWhoosh, Zwift oder die Tacx-App vorher. Hör im ERG-Modus nicht abrupt auf zu treten: Bei Pause senkt die Seite das Ziel auf 40 % der FTP.</p>
 </div>
@@ -162,7 +165,7 @@ const FEC="6e40fec1-b5a3-f393-e0a9-e50e24dcca9e",FEC_RX="6e40fec2-b5a3-f393-e0a9
 let W=null,run=null;
 
 /* ---------- FTMS ---------- */
-function setTr(on,txt){$("#dTr").className="dot"+(on?" on":"");$("#sTr").textContent=txt}
+function setTr(on,txt){$("#dTr").className="dot"+(on?" on":"");$("#sTr").textContent=txt;const d=$("#rDot");if(d){d.className="dot"+(on?" on":"");$("#rTr").textContent=on?txt:"Rolle "+txt;$("#bRe").hidden=!!on}}
 function setHr(on,txt){$("#dHr").className="dot"+(on?" on":"");$("#sHr").textContent=txt}
 function cpw(bytes){
  cq=cq.then(()=>new Promise(res=>{
@@ -307,7 +310,7 @@ function start(dry){const ftp=+$("#ftp").value;if(!(ftp>=50&&ftp<=600)){toast("B
  if(!W){toast("Bitte eine Einheit wählen.",true);return}
  if(!dry&&!cp){toast("Verbinde zuerst die Rolle oder starte den Probelauf.",true);return}
  run={ftp,dry,t:0,adj:1,paused:false,over:false,rec:[],last:performance.now(),acc:0,started:new Date(),stepI:-1};
- $("#setup").hidden=true;$("#exp").hidden=true;$("#svc").hidden=true;$("#done").hidden=true;$("#ride").hidden=false;$("#rName").textContent=W.name+(dry?" · Probelauf":"");profSvg(W,$("#prof"));
+ document.body.classList.add("riding");window.scrollTo(0,0);try{history.pushState({ride:1},"")}catch(x){}$("#setup").hidden=true;$("#exp").hidden=true;$("#svc").hidden=true;$("#done").hidden=true;$("#ride").hidden=false;$("#rName").textContent=W.name+(dry?" · Probelauf":"");profSvg(W,$("#prof"));
  wake();if(!dry&&proto!=="fec"){cpw([0x07]);}tick();run.iv=setInterval(tick,250)}
 function curTarget(){const a=pctAt(W,run.t);if(!a)return null;return{...a,w:Math.round(a.p*run.ftp*run.adj)}}
 function sendTarget(force){if(!run||run.dry)return;const c=curTarget();if(!c)return;setPower(run.paused?Math.round(run.ftp*.4):c.w,force)}
@@ -344,7 +347,7 @@ function finish(){if(!run||run.over)return;run.over=true;clearInterval(run.iv);t
  const bu=$("#bStr");if(bu)bu.onclick=()=>svUpload(bu,$("#upInfo"));
  const bt=$("#bTcx");if(bt)bt.onclick=()=>dl(`wattwerk-rolle-${stamp()}.tcx`,tcx(),"application/vnd.garmin.tcx+xml");
  $("#bCsv").onclick=()=>dl(`wattwerk-rolle-${stamp()}.csv`,wwCsv(),"text/csv");$("#bRaw").onclick=()=>dl(`rolle-sekunden-${stamp()}.csv`,rawCsv(),"text/csv");
- $("#bNew").onclick=()=>{$("#done").hidden=true;$("#setup").hidden=false;$("#exp").hidden=false;$("#svc").hidden=false;run=null}}
+ $("#bNew").onclick=()=>{$("#done").hidden=true;$("#setup").hidden=false;$("#exp").hidden=false;$("#svc").hidden=false;run=null;document.body.classList.remove("riding");window.scrollTo(0,0);if(history.state&&history.state.ride){NOPOP=true;history.back()}}}
 const stamp=()=>{const d=run.started;return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())};
 function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds())}
 function wwCsv(){const s=run.sum;return"Activity ID,Activity Date,Activity Name,Activity Type,Moving Time,Average Watts,Weighted Average Power\n"+[run.started.getTime(),iso(run.started),'"'+("Rolle: "+W.name).replace(/"/g,'""')+'"',"Virtual Ride",s.mv||run.rec.length,Math.round(s.avg),Math.round(s.N)].join(",")+"\n"}
@@ -359,7 +362,8 @@ ${tp}
 function rawCsv(){return"sekunde,watt,trittfrequenz,puls\n"+run.rec.map((r,i)=>[i+1,r[0],Math.round(r[1]),r[2]].join(",")).join("\n")+"\n"}
 function dl(fn,txt,type,quiet){const u=URL.createObjectURL(new Blob([txt],{type}));const a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);if(!quiet)toast("Gespeichert: "+fn)}
 
-$("#bTr").onclick=()=>connectTr(false);$("#bTrAll").onclick=()=>connectTr(true);$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);$("#bDry").onclick=()=>start(true);
+$("#bTr").onclick=()=>connectTr(false);$("#bRe").onclick=()=>connectTr(false);
+let NOPOP=false;addEventListener("popstate",()=>{if(NOPOP){NOPOP=false;return}if(run&&!run.over){try{history.pushState({ride:1},"")}catch(x){}toast("Zum Beenden unten auf „Beenden“ tippen.")}else if(document.body.classList.contains("riding")){const b=$("#bNew");if(b)b.click()}});$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);$("#bDry").onclick=()=>start(true);
 $("#bPause").onclick=pause;$("#bUp").onclick=()=>adj(.05);$("#bDown").onclick=()=>adj(-.05);$("#bSkip").onclick=skip;
 $("#bEnd").onclick=()=>{if(run&&!run.over&&confirmEnd())finish()};
 let endArm=0;function confirmEnd(){if(Date.now()-endArm<3000)return true;endArm=Date.now();toast("Nochmal tippen zum Beenden.");return false}
