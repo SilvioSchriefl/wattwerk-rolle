@@ -157,7 +157,8 @@ const BT=navigator.bluetooth;
 
 /* ---------- Zustand ---------- */
 const D={p:null,c:null,h:null,pt:0,ct:0,ht:0};
-let tr=null,cp=null,hrDev=null,pend=null,cq=Promise.resolve(),range={min:0,max:2000},ctl=false;
+let tr=null,cp=null,hrDev=null,pend=null,cq=Promise.resolve(),range={min:0,max:2000},ctl=false,proto="ftms";
+const FEC="6e40fec1-b5a3-f393-e0a9-e50e24dcca9e",FEC_RX="6e40fec2-b5a3-f393-e0a9-e50e24dcca9e",FEC_TX="6e40fec3-b5a3-f393-e0a9-e50e24dcca9e";
 let W=null,run=null;
 
 /* ---------- FTMS ---------- */
@@ -176,12 +177,21 @@ function onCP(e){const v=e.target.value;if(v.byteLength<3||v.getUint8(0)!==0x80|
 function onIBD(e){const v=e.target.value;if(v.byteLength<2)return;const f=v.getUint16(0,true);let o=2;
  try{if(!(f&1))o+=2;if(f&2)o+=2;if(f&4){D.c=v.getUint16(o,true)/2;D.ct=Date.now();o+=2}if(f&8)o+=2;if(f&16)o+=3;if(f&32)o+=2;
   if(f&64){D.p=v.getInt16(o,true);D.pt=Date.now();o+=2}if(f&128)o+=2;if(f&256)o+=5;if(f&512){if(!hrDev){D.h=v.getUint8(o);D.ht=Date.now()}o+=1}}catch(x){}}
+function onFEC(e){const v=new Uint8Array(e.target.value.buffer.slice(e.target.value.byteOffset,e.target.value.byteOffset+e.target.value.byteLength));if(v.length<12||v[0]!==0xA4)return;const pl=v.slice(4,12),pg=pl[0];
+ if(pg===0x19){const c=pl[2],pw=pl[5]|((pl[6]&0x0F)<<8);if(c!==0xFF){D.c=c;D.ct=Date.now()}if(pw!==0xFFF){D.p=pw;D.pt=Date.now()}}
+ else if(pg===0x10){const h=pl[6];if(!hrDev&&h&&h!==0xFF){D.h=h;D.ht=Date.now()}}}
+async function fecw(w){if(!cp)return false;const u=Math.max(0,Math.min(16000,Math.round(w*4))),m=[0xA4,0x09,0x4F,0x05,0x31,0xFF,0xFF,0xFF,0xFF,0xFF,u&255,(u>>8)&255];m.push(m.reduce((a,b)=>a^b,0));
+ try{const v=new Uint8Array(m);if(cp.writeValueWithoutResponse)await cp.writeValueWithoutResponse(v);else await cp.writeValue(v);return true}catch(e){try{await cp.writeValue(new Uint8Array(m));return true}catch(x){return false}}}
 async function connectTr(){
  try{
-  const dev=await BT.requestDevice({filters:[{services:[0x1826]}],optionalServices:[0x1826]});
+  const dev=await BT.requestDevice({filters:[{services:[0x1826]},{namePrefix:"Tacx"},{services:[FEC]}],optionalServices:[0x1826,FEC]});
   setTr(false,"verbinde …");
   dev.addEventListener("gattserverdisconnected",()=>{cp=null;ctl=false;setTr(false,"Verbindung verloren");toast("Rolle getrennt. Verbinde sie neu, die Einheit läuft weiter.",true)});
-  const srv=await dev.gatt.connect(),fm=await srv.getPrimaryService(0x1826);
+  const srv=await dev.gatt.connect();let fm=null;try{fm=await srv.getPrimaryService(0x1826)}catch(x){fm=null}
+  if(!fm){let fs=null;try{fs=await srv.getPrimaryService(FEC)}catch(x){}if(!fs){try{srv.disconnect&&srv.disconnect()}catch(x){}throw new Error("Diese Rolle bietet weder FTMS noch die Tacx-Schnittstelle über Bluetooth.")}
+   proto="fec";const rx=await fs.getCharacteristic(FEC_RX);rx.addEventListener("characteristicvaluechanged",onFEC);await rx.startNotifications();cp=await fs.getCharacteristic(FEC_TX);range={min:0,max:4000};ctl=true;tr=dev;
+   setTr(true,(dev.name||"Tacx")+" · ERG bereit (Tacx-Modus)");toast("Rolle verbunden.");if(run&&!run.paused)sendTarget(true);return}
+  proto="ftms";
   const ibd=await fm.getCharacteristic(0x2AD2);await ibd.startNotifications();ibd.addEventListener("characteristicvaluechanged",onIBD);
   cp=await fm.getCharacteristic(0x2AD9);cp.addEventListener("characteristicvaluechanged",onCP);await cp.startNotifications();
   try{const r=await fm.getCharacteristic(0x2AD8),v=await r.readValue();range={min:v.getInt16(0,true),max:v.getInt16(2,true)}}catch(x){}
@@ -199,7 +209,7 @@ async function connectHr(){
  }catch(e){if(e&&e.name==="NotFoundError")return;setHr(false,"nicht verbunden");toast("Pulsgurt: "+(e&&e.message||e),true)}}
 let want=null,sending=false,lastSent=null,lastAt=0;
 async function flush(){if(sending||want==null||!cp||!ctl)return;sending=true;const w=want;want=null;
- const ok=await cpw([0x05,w&255,(w>>8)&255]);if(ok){lastSent=w;lastAt=Date.now()}sending=false;if(want!=null)flush()}
+ const ok=proto==="fec"?await fecw(w):await cpw([0x05,w&255,(w>>8)&255]);if(ok){lastSent=w;lastAt=Date.now()}sending=false;if(want!=null)flush()}
 function setPower(w,force){w=Math.round(Math.max(range.min||0,Math.min(range.max||2000,w)));
  if(!force&&w===lastSent&&Date.now()-lastAt<10000)return;want=w;flush()}
 
@@ -296,7 +306,7 @@ function start(dry){const ftp=+$("#ftp").value;if(!(ftp>=50&&ftp<=600)){toast("B
  if(!dry&&!cp){toast("Verbinde zuerst die Rolle oder starte den Probelauf.",true);return}
  run={ftp,dry,t:0,adj:1,paused:false,over:false,rec:[],last:performance.now(),acc:0,started:new Date(),stepI:-1};
  $("#setup").hidden=true;$("#exp").hidden=true;$("#svc").hidden=true;$("#done").hidden=true;$("#ride").hidden=false;$("#rName").textContent=W.name+(dry?" · Probelauf":"");profSvg(W,$("#prof"));
- wake();if(!dry){cpw([0x07]);}tick();run.iv=setInterval(tick,250)}
+ wake();if(!dry&&proto!=="fec"){cpw([0x07]);}tick();run.iv=setInterval(tick,250)}
 function curTarget(){const a=pctAt(W,run.t);if(!a)return null;return{...a,w:Math.round(a.p*run.ftp*run.adj)}}
 function sendTarget(force){if(!run||run.dry)return;const c=curTarget();if(!c)return;setPower(run.paused?Math.round(run.ftp*.4):c.w,force)}
 function tick(){if(!run||run.over)return;const now=performance.now(),dt=(now-run.last)/1000;run.last=now;
