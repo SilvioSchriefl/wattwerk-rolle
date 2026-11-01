@@ -46,7 +46,7 @@ input[type=file]::file-selector-button{background:#16212B;color:var(--ink);borde
 .sum b{display:block;font:700 30px "Barlow Condensed",system-ui,sans-serif}
 @media(max-width:700px){.dash{grid-template-columns:repeat(2,1fr)}.m.big .num{font-size:84px}.m .num{font-size:40px}.sum{grid-template-columns:repeat(2,1fr)}}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
-body.riding #hdr,body.riding #env,body.riding #dev,body.riding #setup,body.riding #exp,body.riding #svc,body.riding #hint{display:none!important}
+body.riding #lib,body.riding #hdr,body.riding #env,body.riding #dev,body.riding #setup,body.riding #exp,body.riding #svc,body.riding #hint{display:none!important}
 @media (pointer:coarse){.kbd{display:none}}
 #gWrap{display:flex;align-items:center;gap:12px;margin:2px 0 4px}
 #gBar{flex:1;height:12px;border-radius:7px;background:#16212B;overflow:hidden;position:relative}
@@ -68,6 +68,35 @@ body.riding #hdr,body.riding #env,body.riding #dev,body.riding #setup,body.ridin
 .okc circle{stroke-width:3;stroke-dasharray:151;stroke-dashoffset:151;animation:draw .7s ease-out forwards}
 .okc path{stroke-width:4;stroke-dasharray:36;stroke-dashoffset:36;animation:draw .35s .6s ease-out forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
+.selp{border-radius:16px;margin-top:12px}
+.selp .src{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.selp .src.tdy{color:var(--ac)}
+.selp h3{font-size:22px;margin:2px 0 0;line-height:1.2}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 8px}
+.trio div{background:#0D1318;border-radius:12px;padding:8px 4px;text-align:center;font-size:13px;color:var(--mut)}
+.trio b{display:block;font:700 26px "Barlow Condensed",system-ui,sans-serif;color:var(--ink)}
+.selp p{margin:8px 0 0;font-size:14px}
+.selp.flash{animation:flash .8s ease-out}@keyframes flash{0%{box-shadow:0 0 0 0 rgba(255,106,61,.7)}100%{box-shadow:0 0 0 16px rgba(255,106,61,0)}}
+.seg{display:flex;background:#0D1318;border:1px solid var(--ln2);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;background:none;color:var(--mut);min-height:42px;border-radius:10px}
+.seg button.on{background:#1E2A36;color:var(--ink)}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 0;padding:0 16px 2px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;min-height:36px;padding:6px 14px;border-radius:18px;background:none;color:var(--ink);border:1px solid var(--ln2);font-size:14px}
+.chips button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.wl{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.wk{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#0D1318;color:var(--ink);border:1px solid var(--ln);border-radius:14px;padding:10px 12px;min-height:66px}
+.wk svg{flex:none;width:68px;height:38px;border-radius:6px;background:#0A0E13}
+.wk .wt{display:flex;flex-direction:column;min-width:0;gap:2px;flex:1}
+.wk b{font-size:16px;line-height:1.2}.wk .mut{font-size:13px;font-weight:400}
+.wk .wd{font-size:12px;font-weight:700;color:var(--cy);text-transform:uppercase;letter-spacing:.05em}.wk .wd.tdy{color:var(--ac)}
+.wk .ck{flex:none;width:24px;height:24px;border-radius:50%;display:none}.wh{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:10px 2px 0}.wh:first-child{margin-top:0}
+.wk.on{border-color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)}
+.wk.on .ck{display:block;background:var(--ac) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%230A0E13' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat}
+.wk.past{opacity:.5}
+.lfoot{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.lfoot button{min-height:40px;font-size:14px}
+.empty{padding:14px 2px 4px}.empty p{margin:0 0 12px}
+@media (prefers-reduced-motion:reduce){.selp.flash{animation:none}}
 button.d{background:none;color:var(--bad);border:1px solid var(--bad)}
 #sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
 #sheet.on{opacity:1;pointer-events:auto}
@@ -90,15 +119,14 @@ button.d{background:none;color:var(--bad);border:1px solid var(--bad)}
  </div>
 </div>
 <div class="card" id="setup">
- <h2>Einheit wählen</h2>
- <div class="row" style="margin-top:8px;align-items:flex-end">
-  <div style="flex:2 1 260px"><label for="wsel">Einheit (Plan oder Bibliothek)</label><select id="wsel" style="width:100%"></select></div>
-  <div style="flex:1 1 120px"><label for="ftp">FTP (Watt)</label><input id="ftp" type="number" min="50" max="600" inputmode="numeric" style="width:100%"></div>
- </div>
- <div style="margin-top:10px"><label for="plan">Plan aus Wattwerk laden (.json)</label><input id="plan" type="file" accept=".json,application/json"><div class="mut" id="planInfo" style="margin-top:4px"></div></div>
- <div style="margin-top:10px"><label for="zwo">Oder eine .zwo-Datei laden</label><input id="zwo" type="file" accept=".zwo,.xml,application/xml,text/xml"></div>
- <div id="pre" style="margin-top:12px"></div>
+ <div class="row sp" style="flex-wrap:nowrap;align-items:flex-end"><h2 style="margin:0">Deine Einheit</h2><div style="width:104px;flex:none"><label for="ftp">FTP (Watt)</label><input id="ftp" type="number" min="50" max="600" inputmode="numeric" style="width:100%"></div></div>
+ <div id="pre" class="selp"></div>
  <div class="row" style="margin-top:12px"><button id="bGo">Einheit starten</button><button class="g" id="bDry">Probelauf ohne Rolle</button></div>
+</div>
+<div class="card" id="lib">
+ <div class="seg" id="seg" role="tablist"></div>
+ <div id="wlist"></div>
+ <input id="plan" type="file" accept=".json,application/json" hidden><input id="zwo" type="file" accept=".zwo,.xml,application/xml,text/xml" hidden>
 </div>
 <div class="card" id="exp">
  <h2>Für Garmin und Zwift speichern</h2>
@@ -287,27 +315,49 @@ let RAF=0;function anim(){RAF=0;if(!run||run.over)return;const T=tot(W),t=Math.m
  const a=pctAt(W,t);if(a){const col=ZC[zi(a.p)],sf=$("#sFill"),d=$("#pDot");sf.style.width=((1-a.left/a.s.d)*100).toFixed(2)+"%";sf.style.backgroundColor=col;d.style.left=(f*100).toFixed(2)+"%";d.style.top=((120-yOf(a.p))/1.2).toFixed(2)+"%";d.style.backgroundColor=col}
  RAF=requestAnimationFrame(anim)}
 function pop(){["#mT","#mS"].forEach(k=>{const e=$(k);e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop")})}
-function preview(){const ftp=+$("#ftp").value||250;if(!W){$("#pre").innerHTML="";return}const T=tot(W),avg=W.steps.reduce((a,s)=>a+s.d*(s.a+s.b)/2,0)/T,tss=W.steps.reduce((a,s)=>a+s.d/3600*((s.a+s.b)/2)**2,0)*100;
- $("#pre").innerHTML=`<div class="row sp"><b>${esc(W.name)}</b><span class="mut">${mmss(T)} · Ø ${Math.round(avg*ftp)} W · ca. ${Math.round(tss)} TSS</span></div><svg id="pv" viewBox="0 0 1000 120" preserveAspectRatio="none" style="width:100%;height:80px;display:block;margin-top:6px"></svg>`;profSvg(W,$("#pv"))}
+const durF=s=>{const m=Math.round(s/60);return m<90?m+" min":Math.floor(m/60)+":"+pad(m%60)+" h"};
+function stats(w,ftp){const T=tot(w),avg=w.steps.reduce((a,s)=>a+s.d*(s.a+s.b)/2,0)/T,tss=w.steps.reduce((a,s)=>a+s.d/3600*((s.a+s.b)/2)**2,0)*100;return{T,avg:Math.round(avg*ftp),tss:Math.round(tss)}}
+function miniSvg(w){const t=document.createElementNS("http://www.w3.org/2000/svg","svg");profSvg(w,t);return t.innerHTML}
+function preview(){const ftp=+$("#ftp").value||250;if(!W){$("#pre").innerHTML="";return}const st=stats(W,ftp);let src="",tdy=false,info="";
+ if(CUR==="zwo")src=".zwo-Datei";else if(String(CUR).startsWith("p")){const it=PLAN&&PLAN.items[+String(CUR).slice(1)];if(it){src=it.date?"Plan · "+dayL(it.date):"Aus deinem Plan";tdy=it.date===todayS()}const m=it&&WO.find(w=>w.n===it.n);if(m)info=m.d||m.s||""}else if(WO[+CUR]){const w=WO[+CUR];src="Bibliothek · "+CATN[catOf(w)];info=w.d||w.s||""}
+ $("#pre").innerHTML=`<div class="src${tdy?" tdy":""}">${esc(src)}</div><h3>${esc(W.name)}</h3><div class="trio"><div><b>${durF(st.T)}</b>Dauer</div><div><b>${st.avg} W</b>Ø Leistung</div><div><b>${st.tss}</b>TSS (ca.)</div></div><svg id="pv" viewBox="0 0 1000 120" preserveAspectRatio="none" style="width:100%;height:80px;display:block;border-radius:8px"></svg>${info?`<p class="mut">${esc(info)}</p>`:""}`;profSvg(W,$("#pv"))}
 let PLAN=ls.get("plan",null);
 const WD=["So","Mo","Di","Mi","Do","Fr","Sa"],pdl=d=>{const x=new Date(d+"T00:00");return isNaN(x)?"":WD[x.getDay()]+" "+x.getDate()+"."+(x.getMonth()+1)+". · "};
 const todayS=()=>{const x=new Date();return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
 function srcW(v){if(String(v).startsWith("p")){const it=PLAN.items[+String(v).slice(1)];return fromWattwerk({n:it.n,b:it.b})}return fromWattwerk(WO[+v])}
-function fillSel(keep){const sel=$("#wsel");let h="";if(PLAN&&PLAN.items.length)h+=`<optgroup label="Dein Plan">${PLAN.items.map((it,i)=>`<option value="p${i}"${it.date&&it.date<todayS()?' class="past"':""}>${pdl(it.date)}${esc(it.n)}</option>`).join("")}</optgroup>`;
- h+=`<optgroup label="Bibliothek">${WO.map((w,i)=>`<option value="${i}">${esc(w.n)}</option>`).join("")}</optgroup>`;sel.innerHTML=h;
- let v=keep;if(v==null||!sel.querySelector(`option[value="${v}"]`)){const nx=PLAN&&PLAN.items.findIndex(it=>!it.date||it.date>=todayS());v=nx!=null&&nx>=0?"p"+nx:String(Math.min(+ls.get("wi",0)||0,WO.length-1))}
- sel.value=String(v);W=srcW(sel.value);$("#bAll").hidden=!(PLAN&&PLAN.items.length>1);
- $("#planInfo").textContent=PLAN&&PLAN.items.length?`Geladen: ${PLAN.items.length} Einheit${PLAN.items.length>1?"en":""}, erstellt am ${PLAN.created||"?"}.`:"";preview()}
-(function(){const sel=$("#wsel");$("#ftp").value=ls.get("ftp",250);fillSel(ls.get("wsel",null));
- sel.addEventListener("change",()=>{W=srcW(sel.value);ls.set("wsel",sel.value);if(!sel.value.startsWith("p"))ls.set("wi",+sel.value);$("#zwo").value="";preview()});
+const CATS=[["all","Alle"],["gl","Grundlage"],["lang","Lang"],["ss","Tempo & Sweetspot"],["th","Schwelle"],["vo","VO₂max"],["spr","Sprint"],["test","Test & Rennen"]],CATN=Object.fromEntries(CATS);
+const CATOF={rec:"gl",gl60:"gl",gl75:"gl",z15:"gl",z2:"gl",long:"lang",longss:"lang",longend:"lang",longrace:"lang",tempo:"ss",tempo2:"ss",ss:"ss",sst:"ss",ss2:"ss",th:"th",th2:"th",ou:"th",berg:"th",kraft:"th",vo2:"vo",vo2b:"vo",vo22:"vo",c3015:"vo",ana:"spr",spr:"spr",race:"test",ftp20:"test",open:"test"};
+function catOf(w){if(CATOF[w.id])return CATOF[w.id];const mx=Math.max(...w.b.map(x=>x[2])),T=w.b.reduce((a,x)=>a+x[0],0);return T>=180?"lang":mx>=1.2?"spr":mx>=1.06?"vo":mx>=.95?"th":mx>=.8?"ss":"gl"}
+function dayL(d){const x=new Date(d+"T00:00");if(isNaN(x))return"";const t=new Date(todayS()+"T00:00"),k=Math.round((x-t)/864e5);return k===0?"Heute":k===1?"Morgen":k===-1?"Gestern":WD[x.getDay()]+" "+x.getDate()+"."+(x.getMonth()+1)+"."}
+let CUR=null,TAB=ls.get("tab",null),CAT=ls.get("cat","all"),PAST=false;const MINI=new Map();
+function card(v,w,name,top,cls){const ftp=+$("#ftp").value||250,st=stats(w,ftp);let m=MINI.get(v+"|"+name);if(!m){m=miniSvg(w);MINI.set(v+"|"+name,m)}
+ return`<button class="wk${String(CUR)===String(v)?" on":""}${cls||""}" data-v="${v}" aria-pressed="${String(CUR)===String(v)}"><svg viewBox="0 0 1000 120" preserveAspectRatio="none" aria-hidden="true">${m}</svg><span class="wt">${top||""}<b>${esc(name)}</b><span class="mut">${durF(st.T)} · ${st.avg} W · ${st.tss} TSS</span></span><span class="ck"></span></button>`}
+function renderList(){const hasP=!!(PLAN&&PLAN.items.length);if(TAB!=="plan"&&TAB!=="lib")TAB=hasP?"plan":"lib";
+ $("#seg").innerHTML=[["plan","Dein Plan"+(hasP?"":"")],["lib","Bibliothek"]].map(([k,t])=>`<button role="tab" data-t="${k}" class="${TAB===k?"on":""}" aria-selected="${TAB===k}">${t}</button>`).join("");let h="";
+ if(TAB==="plan"){if(!hasP)h=`<div class="empty"><p class="mut">Hier erscheinen die Einheiten aus deinem Wattwerk-Plan. Exportiere den Plan in Wattwerk und lade die Datei hier.</p><button data-x="plan">Plan aus Wattwerk laden</button></div>`;
+  else{const td=todayS(),it=PLAN.items.map((x,i)=>({x,i})),past=it.filter(o=>o.x.date&&o.x.date<td),up=it.filter(o=>!o.x.date||o.x.date>=td);
+   const one=o=>card("p"+o.i,fromWattwerk({n:o.x.n,b:o.x.b}),o.x.n,o.x.date?`<span class="wd${o.x.date===td?" tdy":""}">${dayL(o.x.date)}</span>`:"",o.x.date&&o.x.date<td?" past":"");
+   h=`<div class="wl">${up.length?up.map(one).join(""):`<p class="mut" style="margin:4px 0">Keine kommenden Einheiten im geladenen Plan. Lade in Wattwerk einen neuen Plan.</p>`}${PAST?past.map(one).join(""):""}</div>
+   <div class="lfoot">${past.length?`<button class="g" data-x="past">${PAST?"Vergangene ausblenden":"Vergangene zeigen ("+past.length+")"}</button>`:""}<button class="g" data-x="plan">Neuen Plan laden</button></div><p class="mut" style="font-size:13px;margin:8px 0 0">Geladen am ${esc(PLAN.created||"?")}, ${PLAN.items.length} Einheit${PLAN.items.length>1?"en":""}.</p>`}}
+ else{const ci=k=>CATS.findIndex(c=>c[0]===k),list=WO.map((w,i)=>({w,i,c:catOf(w),T:w.b.reduce((a,x)=>a+x[0],0)})).filter(o=>CAT==="all"||o.c===CAT).sort((a,b)=>ci(a.c)-ci(b.c)||a.T-b.T);let lc="";
+  h=`<div class="chips">${CATS.filter(([k])=>k==="all"||WO.some(w=>catOf(w)===k)).map(([k,t])=>`<button data-c="${k}" class="${CAT===k?"on":""}">${t}</button>`).join("")}</div><div class="wl">${list.map(o=>{const hd=CAT==="all"&&o.c!==lc?`<div class="wh">${CATN[o.c]}</div>`:"";lc=o.c;return hd+card(o.i,fromWattwerk(o.w),o.w.n)}).join("")}</div><div class="lfoot"><button class="g" data-x="zwo">Eigene .zwo-Datei laden</button></div>`}
+ $("#wlist").innerHTML=h;$("#bAll").hidden=!(hasP&&PLAN.items.length>1)}
+function selectW(v,jump){CUR=String(v);W=srcW(CUR);ls.set("wsel",CUR);if(!CUR.startsWith("p"))ls.set("wi",+CUR);$("#zwo").value="";preview();renderList();
+ if(jump){const p=$("#pre");p.classList.remove("flash");void p.offsetWidth;p.classList.add("flash");$("#setup").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"})}}
+function fillSel(keep){const ok=v=>v!=null&&(String(v).startsWith("p")?!!(PLAN&&PLAN.items[+String(v).slice(1)]):!!WO[+v]);let v=keep;
+ if(!ok(v)){const td=todayS(),nx=PLAN?PLAN.items.findIndex(it=>!it.date||it.date>=td):-1;v=nx>=0?"p"+nx:String(Math.min(+ls.get("wi",0)||0,WO.length-1))}selectW(v,false)}
+(function(){$("#ftp").value=ls.get("ftp",250);fillSel(ls.get("wsel",null));
+ $("#lib").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.v!=null)selectW(b.dataset.v,true);else if(b.dataset.t){TAB=b.dataset.t;ls.set("tab",TAB);renderList()}else if(b.dataset.c){CAT=b.dataset.c;ls.set("cat",CAT);renderList()}
+  else if(b.dataset.x==="past"){PAST=!PAST;renderList()}else if(b.dataset.x==="plan")$("#plan").click();else if(b.dataset.x==="zwo")$("#zwo").click()});
  $("#plan").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const j=JSON.parse(t.replace(/^﻿/,""));if(j.app!=="wattwerk-plan"||!Array.isArray(j.items)||!j.items.every(it=>it&&it.n&&Array.isArray(it.b)&&it.b.length))throw 0;
-   const nd=new Set(j.items.map(it=>it.date||"")),cut=(()=>{const x=new Date();x.setDate(x.getDate()-14);return x.toISOString().slice(0,10)})(),old=(PLAN&&PLAN.items||[]).filter(it=>it.date&&!nd.has(it.date)&&it.date>=cut);PLAN={created:j.created||"",items:[...old,...j.items].sort((a,b)=>(a.date||"9").localeCompare(b.date||"9"))};ls.set("plan",PLAN);if(+j.ftp>=50&&+j.ftp<=600&&+j.ftp!==+$("#ftp").value){$("#ftp").value=Math.round(j.ftp);ls.set("ftp",Math.round(j.ftp))}fillSel(null);toast(j.items.length==1?"Einheit geladen: "+j.items[0].n:"Plan geladen: "+j.items.length+" Einheiten")}catch(x){toast("Das ist keine Plan-Datei aus Wattwerk.",true)}e.target.value=""})});
+   const nd=new Set(j.items.map(it=>it.date||"")),cut=(()=>{const x=new Date();x.setDate(x.getDate()-14);return x.toISOString().slice(0,10)})(),old=(PLAN&&PLAN.items||[]).filter(it=>it.date&&!nd.has(it.date)&&it.date>=cut);PLAN={created:j.created||"",items:[...old,...j.items].sort((a,b)=>(a.date||"9").localeCompare(b.date||"9"))};ls.set("plan",PLAN);if(+j.ftp>=50&&+j.ftp<=600&&+j.ftp!==+$("#ftp").value){$("#ftp").value=Math.round(j.ftp);ls.set("ftp",Math.round(j.ftp))}TAB="plan";ls.set("tab",TAB);MINI.clear();fillSel(null);toast(j.items.length==1?"Einheit geladen: "+j.items[0].n:"Plan geladen: "+j.items.length+" Einheiten")}catch(x){toast("Das ist keine Plan-Datei aus Wattwerk.",true)}e.target.value=""})});
  const ftpV=()=>+$("#ftp").value||250;
  $("#bFit").addEventListener("click",()=>{if(!W)return;if(W.steps.length>50){toast("Zu viele Abschnitte für Garmin (über 50). Nimm die .zwo-Datei.",true);return}dl(fnOf(W.name)+".fit",fitBytes(W,ftpV()),"application/octet-stream")});
  $("#bZw").addEventListener("click",()=>{if(W)dl(fnOf(W.name)+".zwo",zwoTxt(W),"application/xml")});
  $("#bAll").addEventListener("click",async()=>{if(!PLAN)return;let n=0,sk=0;for(const it of PLAN.items){const w=fromWattwerk({n:it.n,b:it.b});if(w.steps.length>50){sk++;continue}dl((it.date?it.date+"_":"")+fnOf(it.n)+".fit",fitBytes(w,ftpV()),"application/octet-stream",true);n++;await new Promise(r=>setTimeout(r,450))}toast(n+" .fit-Dateien gespeichert"+(sk?`, ${sk} mit zu vielen Abschnitten übersprungen (dafür .zwo nehmen)`:"")+".")});
- $("#ftp").addEventListener("change",()=>{const f=+$("#ftp").value;if(f>=50&&f<=600){ls.set("ftp",Math.round(f));preview()}else toast("Bitte eine FTP zwischen 50 und 600 W eingeben.",true)});
- $("#zwo").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{W=parseZwo(t);preview();toast("Einheit geladen: "+W.name)}catch(x){toast(x.message,true)}})})})();
+ $("#ftp").addEventListener("change",()=>{const f=+$("#ftp").value;if(f>=50&&f<=600){ls.set("ftp",Math.round(f));preview();document.querySelectorAll("#wlist .wk").forEach(b=>{const st=stats(srcW(b.dataset.v),f),m=b.querySelector(".wt>.mut");if(m)m.textContent=`${durF(st.T)} · ${st.avg} W · ${st.tss} TSS`})}else toast("Bitte eine FTP zwischen 50 und 600 W eingeben.",true)});
+ $("#zwo").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{W=parseZwo(t);CUR="zwo";preview();renderList();window.scrollTo({top:0,behavior:"smooth"});toast("Einheit geladen: "+W.name)}catch(x){toast(x.message,true)}})})})();
 
 /* ---------- Strava ---------- */
 let SV=ls.get("sv",{});const svOn=()=>!!(SV.w&&SV.c&&SV.rt);
