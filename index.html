@@ -48,6 +48,27 @@ input[type=file]::file-selector-button{background:#16212B;color:var(--ink);borde
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
 body.riding #hdr,body.riding #env,body.riding #dev,body.riding #setup,body.riding #exp,body.riding #svc,body.riding #hint{display:none!important}
 @media (pointer:coarse){.kbd{display:none}}
+#gWrap{display:flex;align-items:center;gap:12px;margin:2px 0 4px}
+#gBar{flex:1;height:12px;border-radius:7px;background:#16212B;overflow:hidden;position:relative}
+#gFill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:7px;background:linear-gradient(90deg,#FFB03D,var(--ac));overflow:hidden}
+#gFill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent) no-repeat;background-size:60px 100%;animation:shim 2.2s linear infinite}
+@keyframes shim{from{background-position:-60px 0}to{background-position:calc(100% + 60px) 0}}
+#gPct{font:700 22px "Barlow Condensed",system-ui,sans-serif;min-width:52px;text-align:right}
+#ride.paused #gFill{filter:grayscale(1);opacity:.6}#ride.paused #gFill::after,#ride.paused #pDot{animation:none}
+.m{position:relative;overflow:hidden}.m .num,.m .lab{position:relative}
+#sFill{position:absolute;left:0;top:0;bottom:0;width:0;opacity:.24;pointer-events:none;transition:background-color .4s}
+.m.soon{border-color:var(--ac);animation:pulse 1s ease-in-out infinite}.m.soon .num{color:var(--ac)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,106,61,0)}50%{box-shadow:0 0 0 4px rgba(255,106,61,.55)}}
+.m.pop{animation:pop .55s ease-out}@keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.07)}100%{transform:scale(1)}}
+#pWrap{position:relative}
+#pDot{position:absolute;left:0;top:100%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;border:3px solid #fff;background:var(--cy);pointer-events:none;animation:ring 1.6s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(255,255,255,.6)}100%{box-shadow:0 0 0 14px rgba(255,255,255,0)}}
+.okc{width:60px;height:60px;display:block;margin:0 0 8px}
+.okc circle,.okc path{fill:none;stroke:var(--ok);stroke-linecap:round;stroke-linejoin:round}
+.okc circle{stroke-width:3;stroke-dasharray:151;stroke-dashoffset:151;animation:draw .7s ease-out forwards}
+.okc path{stroke-width:4;stroke-dasharray:36;stroke-dashoffset:36;animation:draw .35s .6s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){#gFill::after,#pDot,.m.soon,.m.pop{animation:none!important}.okc circle,.okc path{animation:none;stroke-dashoffset:0}}
 #toast.show{opacity:1}#toast.err{background:var(--bad);color:#fff}
 </style></head><body>
 <main>
@@ -80,15 +101,16 @@ body.riding #hdr,body.riding #env,body.riding #dev,body.riding #setup,body.ridin
 <div id="ride" hidden>
  <div class="row sp" style="margin-bottom:6px"><span class="mut"><span class="dot" id="rDot"></span><span id="rTr">Rolle nicht verbunden</span></span><button class="g" id="bRe" hidden>Rolle neu verbinden</button></div>
  <div class="row sp"><h2 id="rName"></h2><span class="mut" id="rState"></span></div>
+ <div id="gWrap" role="progressbar" aria-label="Fortschritt der Einheit" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="gBar"><i id="gFill"></i></div><span id="gPct">0 %</span></div>
  <div class="dash">
   <div class="m big"><div class="num" id="vP">–</div><div class="lab">Leistung (W, 3 s)</div></div>
-  <div class="m tgt"><div class="num" id="vT">–</div><div class="lab">Ziel (W)</div></div>
-  <div class="m"><div class="num" id="vS">–</div><div class="lab">Abschnitt noch</div></div>
+  <div class="m tgt" id="mT"><div class="num" id="vT">–</div><div class="lab">Ziel (W)</div></div>
+  <div class="m" id="mS"><i id="sFill"></i><div class="num" id="vS">–</div><div class="lab">Abschnitt noch</div></div>
   <div class="m"><div class="num" id="vC">–</div><div class="lab">Trittfrequenz</div></div>
   <div class="m"><div class="num" id="vH">–</div><div class="lab">Puls</div></div>
  </div>
  <div class="card"><div class="row sp"><span class="step" id="vStep"></span><span class="mut" id="vNext"></span></div>
-  <svg id="prof" viewBox="0 0 1000 120" preserveAspectRatio="none" role="img" aria-label="Verlauf der Einheit"></svg>
+  <div id="pWrap"><svg id="prof" viewBox="0 0 1000 120" preserveAspectRatio="none" role="img" aria-label="Verlauf der Einheit"></svg><i id="pDot"></i></div>
   <div class="row sp mut"><span id="vEl">0:00</span><span id="vAdj">Intensität 100 %</span><span id="vRem"></span></div>
  </div>
  <div class="row ctl">
@@ -249,7 +271,14 @@ function zwoTxt(w){const b=blocks(w),n=b.length,sm=(x,y)=>x[0]==y[0]&&x[1]==y[1]
 function pctAt(w,t){let c=0;for(let i=0;i<w.steps.length;i++){const s=w.steps[i];if(t<c+s.d){const f=(t-c)/s.d;return{i,p:s.ramp?s.a+(s.b-s.a)*f:(s.a+s.b)/2,left:c+s.d-t,s}}c+=s.d}return null}
 function profSvg(w,el){const T=tot(w);let x=0,h="";w.steps.forEach(s=>{const bw=s.d/T*1000,p=s.ramp?(s.a+s.b)/2:(s.a+s.b)/2,y=Math.max(8,Math.min(1,(p-.3)/1.1)*110);
   h+=s.ramp?`<polygon points="${x.toFixed(1)},120 ${x.toFixed(1)},${(120-Math.max(8,Math.min(1,(s.a-.3)/1.1)*110)).toFixed(1)} ${(x+bw).toFixed(1)},${(120-Math.max(8,Math.min(1,(s.b-.3)/1.1)*110)).toFixed(1)} ${(x+bw).toFixed(1)},120" fill="${ZC[zi(p)]}"/>`:`<rect x="${x.toFixed(1)}" y="${(120-y).toFixed(1)}" width="${Math.max(bw-.8,.8).toFixed(1)}" height="${y.toFixed(1)}" fill="${ZC[zi(p)]}"/>`;x+=bw});
- el.innerHTML=h+`<rect id="pDone" x="0" y="0" width="0" height="120" fill="#000" opacity=".45"/><line id="pNow" x1="0" x2="0" y1="0" y2="120" stroke="#fff" stroke-width="3"/>`}
+ el.innerHTML=h+(el.id=="prof"?`<rect id="pTodo" x="0" y="0" width="1000" height="120" fill="#0A0E13" opacity=".55"/><line id="pNow" x1="0" x2="0" y1="0" y2="120" stroke="#fff" stroke-width="2" opacity=".8"/>`:"")}
+const yOf=p=>Math.max(8,Math.min(1,(p-.3)/1.1)*110);
+let RAF=0;function anim(){RAF=0;if(!run||run.over)return;const T=tot(W),t=Math.min(T,run.t+(run.paused?0:Math.min(.5,(performance.now()-run.last)/1000))),f=t/T,x=(f*1000).toFixed(1),pc=Math.floor(f*100);
+ $("#gFill").style.width=(f*100).toFixed(2)+"%";if($("#gPct").textContent!==pc+" %"){$("#gPct").textContent=pc+" %";$("#gWrap").setAttribute("aria-valuenow",pc)}
+ const pt=$("#pTodo"),pn=$("#pNow");if(pt){pt.setAttribute("x",x);pt.setAttribute("width",(1000-x).toFixed(1))}if(pn){pn.setAttribute("x1",x);pn.setAttribute("x2",x)}
+ const a=pctAt(W,t);if(a){const col=ZC[zi(a.p)],sf=$("#sFill"),d=$("#pDot");sf.style.width=((1-a.left/a.s.d)*100).toFixed(2)+"%";sf.style.backgroundColor=col;d.style.left=(f*100).toFixed(2)+"%";d.style.top=((120-yOf(a.p))/1.2).toFixed(2)+"%";d.style.backgroundColor=col}
+ RAF=requestAnimationFrame(anim)}
+function pop(){["#mT","#mS"].forEach(k=>{const e=$(k);e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop")})}
 function preview(){const ftp=+$("#ftp").value||250;if(!W){$("#pre").innerHTML="";return}const T=tot(W),avg=W.steps.reduce((a,s)=>a+s.d*(s.a+s.b)/2,0)/T,tss=W.steps.reduce((a,s)=>a+s.d/3600*((s.a+s.b)/2)**2,0)*100;
  $("#pre").innerHTML=`<div class="row sp"><b>${esc(W.name)}</b><span class="mut">${mmss(T)} · Ø ${Math.round(avg*ftp)} W · ca. ${Math.round(tss)} TSS</span></div><svg id="pv" viewBox="0 0 1000 120" preserveAspectRatio="none" style="width:100%;height:80px;display:block;margin-top:6px"></svg>`;profSvg(W,$("#pv"))}
 let PLAN=ls.get("plan",null);
@@ -310,14 +339,16 @@ function start(dry){const ftp=+$("#ftp").value;if(!(ftp>=50&&ftp<=600)){toast("B
  if(!W){toast("Bitte eine Einheit wählen.",true);return}
  if(!dry&&!cp){toast("Verbinde zuerst die Rolle oder starte den Probelauf.",true);return}
  run={ftp,dry,t:0,adj:1,paused:false,over:false,rec:[],last:performance.now(),acc:0,started:new Date(),stepI:-1};
- document.body.classList.add("riding");window.scrollTo(0,0);try{history.pushState({ride:1},"")}catch(x){}$("#setup").hidden=true;$("#exp").hidden=true;$("#svc").hidden=true;$("#done").hidden=true;$("#ride").hidden=false;$("#rName").textContent=W.name+(dry?" · Probelauf":"");profSvg(W,$("#prof"));
+ document.body.classList.add("riding");window.scrollTo(0,0);try{history.pushState({ride:1},"")}catch(x){}$("#setup").hidden=true;$("#exp").hidden=true;$("#svc").hidden=true;$("#done").hidden=true;$("#ride").hidden=false;$("#rName").textContent=W.name+(dry?" · Probelauf":"");profSvg(W,$("#prof"));$("#ride").classList.remove("paused");$("#mS").classList.remove("soon");
+ cancelAnimationFrame(RAF);RAF=requestAnimationFrame(anim);
  wake();if(!dry&&proto!=="fec"){cpw([0x07]);}tick();run.iv=setInterval(tick,250)}
 function curTarget(){const a=pctAt(W,run.t);if(!a)return null;return{...a,w:Math.round(a.p*run.ftp*run.adj)}}
 function sendTarget(force){if(!run||run.dry)return;const c=curTarget();if(!c)return;setPower(run.paused?Math.round(run.ftp*.4):c.w,force)}
 function tick(){if(!run||run.over)return;const now=performance.now(),dt=(now-run.last)/1000;run.last=now;
  if(!run.paused){run.t+=dt;run.acc+=dt;while(run.acc>=1){run.acc-=1;const fr=x=>Date.now()-x<3000;run.rec.push([fr(D.pt)?D.p:0,fr(D.ct)?D.c:0,fr(D.ht)?D.h:0])}}
  const T=tot(W);if(run.t>=T){finish();return}
- const c=curTarget();if(c.i!==run.stepI){run.stepI=c.i;if(c.i>0&&!run.dry)toast("Nächster Abschnitt: "+Math.round(c.w)+" W")}
+ const c=curTarget();if(c.i!==run.stepI){run.stepI=c.i;if(c.i>0){pop();if(!run.dry)toast("Nächster Abschnitt: "+Math.round(c.w)+" W")}}
+ if(!run.half&&run.t>=T/2&&T>=600){run.half=1;if(c.left>3)toast("Halbzeit geschafft.")}
  sendTarget(false);paint(c,T)}
 function paint(c,T){const fr=x=>Date.now()-x<3000,r=run.rec.slice(-3).map(x=>x[0]),p3=r.length?Math.round(r.reduce((a,x)=>a+x,0)/r.length):null;
  $("#vP").textContent=fr(D.pt)?p3:"–";$("#vT").textContent=run.paused?Math.round(run.ftp*.4):c.w;$("#vS").textContent=mmss(c.left);
@@ -327,27 +358,28 @@ function paint(c,T){const fr=x=>Date.now()-x<3000,r=run.rec.slice(-3).map(x=>x[0
  $("#vStep").textContent=`Abschnitt ${c.i+1}/${W.steps.length}: ${s.ramp?lo+" → "+hi:Math.round((s.a+s.b)/2*run.ftp*run.adj)} W, ${mmss(s.d)}${s.free?" (frei)":""}`;
  const n=W.steps[c.i+1];$("#vNext").textContent=n?`danach ${Math.round((n.ramp?n.a:(n.a+n.b)/2)*run.ftp*run.adj)} W für ${mmss(n.d)}`:"letzter Abschnitt";
  $("#vEl").textContent=mmss(run.t);$("#vRem").textContent="noch "+mmss(T-run.t);$("#vAdj").textContent="Intensität "+Math.round(run.adj*100)+" %";
- const x=run.t/T*1000;const pd=$("#pDone"),pn=$("#pNow");if(pd)pd.setAttribute("width",x.toFixed(1));if(pn){pn.setAttribute("x1",x.toFixed(1));pn.setAttribute("x2",x.toFixed(1))}
+ $("#mS").classList.toggle("soon",!run.paused&&c.left<=5&&c.i<W.steps.length-1);$("#ride").classList.toggle("paused",run.paused);
  $("#rState").textContent=run.paused?"pausiert":(run.dry?"Probelauf":(ctl?"ERG aktiv":"nur Anzeige"));$("#bPause").textContent=run.paused?"Weiter":"Pause"}
 function pause(){if(!run||run.over)return;run.paused=!run.paused;run.last=performance.now();sendTarget(true);toast(run.paused?"Pausiert, Ziel auf 40 % der FTP gesenkt.":"Weiter geht's.");tick()}
 function adj(d){if(!run||run.over)return;run.adj=Math.max(.5,Math.min(1.3,Math.round((run.adj+d)*100)/100));sendTarget(true);tick()}
 function skip(){if(!run||run.over)return;const c=curTarget();if(c){run.t+=c.left+.01;tick()}}
 function np(a){if(a.length<30)return a.length?a.reduce((x,y)=>x+y,0)/a.length:0;let s=0,n=0,w=0;for(let i=0;i<a.length;i++){w+=a[i];if(i>=30)w-=a[i-30];if(i>=29){s+=Math.pow(w/30,4);n++}}return Math.pow(s/n,.25)}
-function finish(){if(!run||run.over)return;run.over=true;clearInterval(run.iv);try{wl&&wl.release()}catch(e){}
+function finish(){if(!run||run.over)return;run.over=true;clearInterval(run.iv);cancelAnimationFrame(RAF);RAF=0;try{wl&&wl.release()}catch(e){}
  if(!run.dry&&cp)setPower(Math.round(run.ftp*.4),true);
  const R=run.rec,pw=R.map(x=>x[0]),mv=R.filter(x=>x[0]>0||x[1]>0).length,avg=pw.length?pw.reduce((a,b)=>a+b,0)/pw.length:0,N=np(pw),IF=N/run.ftp,tss=R.length/3600*IF*IF*100;
  const cad=R.filter(x=>x[1]>0),hr=R.filter(x=>x[2]>0),ac=cad.length?cad.reduce((a,x)=>a+x[1],0)/cad.length:0,ah=hr.length?hr.reduce((a,x)=>a+x[2],0)/hr.length:0;
  run.sum={avg,N,IF,tss,mv,ac,ah};
  $("#ride").hidden=true;$("#done").hidden=false;
- $("#done").innerHTML=`<div class="card"><h2>Geschafft: ${esc(W.name)}</h2><p class="mut">${run.dry?"Probelauf ohne Rolle, die Werte sind leer.":"Das Ziel ist auf 40 % der FTP gesenkt. Rolle locker ausrollen."}</p>
+ $("#done").innerHTML=`<div class="card"><svg class="okc" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-15"/></svg><h2>Geschafft: ${esc(W.name)}</h2><p class="mut">${run.dry?"Probelauf ohne Rolle, die Werte sind leer.":"Das Ziel ist auf 40 % der FTP gesenkt. Rolle locker ausrollen."}</p>
  <div class="sum"><div><b>${mmss(R.length)}</b><span class="mut">Dauer</span></div><div><b>${Math.round(avg)} W</b><span class="mut">Ø Leistung</span></div><div><b>${Math.round(N)} W</b><span class="mut">NP</span></div>
  <div><b>${Math.round(tss)}</b><span class="mut">TSS</span></div><div><b>${ac?Math.round(ac):"–"}</b><span class="mut">Ø Trittfrequenz</span></div><div><b>${ah?Math.round(ah):"–"}</b><span class="mut">Ø Puls</span></div></div>
  <div class="row" style="margin-top:12px">${run.dry?"":svOn()?`<button id="bStr">Zu Strava hochladen</button><button class="g" id="bTcx">.tcx speichern</button>`:`<button id="bTcx">Für Strava speichern (.tcx)</button>`}<button class="g" id="bCsv">Nur für Wattwerk (.csv)</button><button class="g" id="bRaw">Sekundendaten (.csv)</button><button class="g" id="bNew">Neue Einheit</button></div>
  <p class="mut" id="upInfo"></p><p class="mut">${run.dry||svOn()?"":`<b style="color:var(--ink)">Zu Strava:</b> Datei speichern, dann in Chrome strava.com/upload/select öffnen (auf dem Handy im Menü ⋮ „Desktopwebsite“ einschalten), die .tcx-Datei auswählen und als Sportart „Virtuelle Radfahrt“ wählen. Danach holt der Strava-Knopf in Wattwerk die Fahrt automatisch. Die .csv brauchst du dann nicht, sonst steht die Fahrt doppelt im Log. `}Die .csv ist nur für den Fall gedacht, dass die Fahrt nicht zu Strava soll.</p></div>`;
- const bu=$("#bStr");if(bu)bu.onclick=()=>svUpload(bu,$("#upInfo"));
+ countUp($("#done"));const bu=$("#bStr");if(bu)bu.onclick=()=>svUpload(bu,$("#upInfo"));
  const bt=$("#bTcx");if(bt)bt.onclick=()=>dl(`wattwerk-rolle-${stamp()}.tcx`,tcx(),"application/vnd.garmin.tcx+xml");
  $("#bCsv").onclick=()=>dl(`wattwerk-rolle-${stamp()}.csv`,wwCsv(),"text/csv");$("#bRaw").onclick=()=>dl(`rolle-sekunden-${stamp()}.csv`,rawCsv(),"text/csv");
  $("#bNew").onclick=()=>{$("#done").hidden=true;$("#setup").hidden=false;$("#exp").hidden=false;$("#svc").hidden=false;run=null;document.body.classList.remove("riding");window.scrollTo(0,0);if(history.state&&history.state.ride){NOPOP=true;history.back()}}}
+function countUp(root){try{if(matchMedia("(prefers-reduced-motion: reduce)").matches)return}catch(e){}root.querySelectorAll(".sum b").forEach(b=>{const m=b.textContent.match(/^(\d+)( W)?$/);if(!m)return;const v=+m[1],u=m[2]||"",t0=performance.now();b.textContent="0"+u;const st=n=>{const k=Math.min(1,(n-t0)/900);b.textContent=Math.round(v*(1-Math.pow(1-k,3)))+u;if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)})}
 const stamp=()=>{const d=run.started;return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())};
 function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds())}
 function wwCsv(){const s=run.sum;return"Activity ID,Activity Date,Activity Name,Activity Type,Moving Time,Average Watts,Weighted Average Power\n"+[run.started.getTime(),iso(run.started),'"'+("Rolle: "+W.name).replace(/"/g,'""')+'"',"Virtual Ride",s.mv||run.rec.length,Math.round(s.avg),Math.round(s.N)].join(",")+"\n"}
