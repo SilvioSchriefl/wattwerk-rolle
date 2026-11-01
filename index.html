@@ -98,6 +98,7 @@ input[type=file]::file-selector-button{background:#16212B;color:var(--ink);borde
  <p class="mut">Tastatur: Leertaste Pause, Pfeil hoch/runter Intensität, Pfeil rechts nächster Abschnitt.</p>
 </div>
 <div id="done" hidden></div>
+<div class="card" id="svc"></div>
 <div class="card"><h3>Hinweise</h3>
  <p class="mut">Die Seite steuert Rollen, die den Bluetooth-Standard FTMS unterstützen. Viele neuere Tacx-Rollen tun das mit aktueller Firmware; prüfe im Zweifel ein Update in der Tacx-App. Erscheint deine Rolle beim Verbinden nicht in der Liste, unterstützt sie FTMS nicht, dann fahre die Einheit über MyWhoosh oder Zwift.</p>
  <p class="mut">Die Rolle kann immer nur mit einer App verbunden sein. Schließe MyWhoosh, Zwift oder die Tacx-App vorher. Hör im ERG-Modus nicht abrupt auf zu treten: Bei Pause senkt die Seite das Ziel auf 40 % der FTP.</p>
@@ -256,6 +257,37 @@ function fillSel(keep){const sel=$("#wsel");let h="";if(PLAN&&PLAN.items.length)
  $("#ftp").addEventListener("change",()=>{const f=+$("#ftp").value;if(f>=50&&f<=600){ls.set("ftp",Math.round(f));preview()}else toast("Bitte eine FTP zwischen 50 und 600 W eingeben.",true)});
  $("#zwo").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{W=parseZwo(t);preview();toast("Einheit geladen: "+W.name)}catch(x){toast(x.message,true)}})})})();
 
+/* ---------- Strava ---------- */
+let SV=ls.get("sv",{});const svOn=()=>!!(SV.w&&SV.c&&SV.rt);
+function svCard(){const el=$("#svc");if(!el)return;if(svOn()){el.innerHTML=`<h2>Strava</h2><p class="mut" style="margin:6px 0 10px">Verbunden${SV.name?" als "+esc(SV.name):""}. Nach jeder Fahrt lädst du sie mit einem Tipp hoch.</p><button class="g" id="svOff">Verbindung trennen</button>`;$("#svOff").onclick=()=>{SV={w:SV.w,c:SV.c};ls.set("sv",SV);svCard();toast("Strava getrennt")};return}
+ el.innerHTML=`<h2>Strava verbinden</h2><p class="mut" style="margin:6px 0 10px">Damit Fahrten automatisch zu Strava gehen. Die Adresse deines Vermittlers und die Client-ID deiner Strava-App trägst du einmal ein.</p>
+ <label for="svW">Vermittler-Adresse</label><input id="svW" type="url" placeholder="https://wattwerk-strava.….workers.dev" value="${esc(SV.w||"")}" style="width:100%;margin-bottom:8px">
+ <label for="svC">Client-ID</label><input id="svC" type="text" inputmode="numeric" value="${esc(SV.c||"")}" style="width:100%;margin-bottom:12px"><button id="svGo">Mit Strava verbinden</button>`;
+ $("#svGo").onclick=async()=>{const w=($("#svW").value||"").trim().replace(/\/+$/,""),c=($("#svC").value||"").trim();if(!/^https:\/\/[^\s/]+/.test(w)){toast("Bitte die Vermittler-Adresse mit https:// eintragen.",true);return}if(!/^\d+$/.test(c)){toast("Die Client-ID besteht nur aus Ziffern.",true);return}
+  try{const r=await fetch(w+"/health");const d=await r.json();if(!d||d.app!=="wattwerk-strava"){toast("Unter dieser Adresse läuft kein Wattwerk-Vermittler.",true);return}if(!d.configured){toast("Beim Vermittler fehlen noch Client-ID und Secret.",true);return}}catch(e){toast("Vermittler nicht erreichbar. Adresse prüfen.",true);return}
+  const st=Math.random().toString(36).slice(2);SV={w,c};ls.set("sv",SV);ls.set("svs",st);
+  location.href="https://www.strava.com/oauth/authorize?"+new URLSearchParams({client_id:c,redirect_uri:location.origin+location.pathname,response_type:"code",approval_prompt:"auto",scope:"activity:write",state:st})}}
+async function svBack(){const q=new URLSearchParams(location.search);if(!q.has("state"))return;const st=q.get("state"),ok=st&&st===ls.get("svs",null);history.replaceState(null,"",location.pathname);ls.set("svs",null);
+ if(q.get("error")){toast("Strava-Verbindung abgebrochen.",true);return}if(!ok||!q.get("code")){toast("Strava-Antwort passt nicht. Bitte noch einmal verbinden.",true);return}
+ if(!/activity:write/.test(q.get("scope")||"")){toast("Bitte beim Verbinden das Hochladen von Aktivitäten erlauben.",true);return}
+ try{const r=await fetch(SV.w+"/token",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:q.get("code"),scope:q.get("scope")})}),d=await r.json();if(!r.ok||!d.refresh_token)throw new Error(d.error||"Fehler");
+  SV={...SV,at:d.access_token,rt:d.refresh_token,exp:d.expires_at,name:d.athlete&&d.athlete.firstname||""};ls.set("sv",SV);svCard();toast("Mit Strava verbunden")}catch(e){toast("Verbinden fehlgeschlagen: "+e.message,true)}}
+async function svTok(force){if(!svOn())throw new Error("nicht verbunden");if(!force&&SV.at&&SV.exp&&SV.exp-120>Date.now()/1000)return SV.at;
+ const r=await fetch(SV.w+"/refresh",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({refresh_token:SV.rt})}),d=await r.json().catch(()=>({}));
+ if(!r.ok||!d.access_token){if(r.status===401){SV={w:SV.w,c:SV.c};ls.set("sv",SV);svCard()}throw new Error(r.status===401?"Strava-Zugang abgelaufen, bitte neu verbinden":"Vermittler nicht erreichbar")}
+ SV={...SV,at:d.access_token,rt:d.refresh_token||SV.rt,exp:d.expires_at};ls.set("sv",SV);return SV.at}
+async function svUpload(btn,info){btn.disabled=true;const say=m=>{info.innerHTML=m};say("Lade zu Strava hoch …");
+ try{const mk=()=>{const f=new FormData();f.append("file",new Blob([tcx()],{type:"application/xml"}),`wattwerk-rolle-${stamp()}.tcx`);f.append("data_type","tcx");f.append("trainer","1");f.append("name","Rolle: "+W.name);f.append("description","Aufgezeichnet mit Wattwerk Rolle");f.append("external_id","wattwerk-rolle-"+run.started.getTime());return f};
+  let tok=await svTok(),r=await fetch(SV.w+"/upload",{method:"POST",headers:{Authorization:"Bearer "+tok},body:mk()});
+  if(r.status===401){tok=await svTok(true);r=await fetch(SV.w+"/upload",{method:"POST",headers:{Authorization:"Bearer "+tok},body:mk()})}
+  let d=await r.json().catch(()=>({}));if(!r.ok||d.error)throw new Error(d.error||d.message||("Fehler "+r.status));
+  for(let i=0;i<20&&!d.activity_id&&!d.error;i++){await new Promise(z=>setTimeout(z,2000));say(`Strava verarbeitet die Fahrt … ${i+1}`);const s=await fetch(SV.w+"/status?id="+d.id,{headers:{Authorization:"Bearer "+tok}});d=await s.json().catch(()=>d)}
+  if(d.error)throw new Error(d.error);
+  if(d.activity_id){btn.textContent="✓ Auf Strava";say(`Hochgeladen. <a href="https://www.strava.com/activities/${encodeURIComponent(d.activity_id)}" target="_blank" rel="noopener">Auf Strava ansehen</a>. In Wattwerk holt der Strava-Knopf die Fahrt jetzt.`);run.up=d.activity_id;toast("Auf Strava hochgeladen")}
+  else{btn.textContent="✓ Hochgeladen";say("Hochgeladen. Strava braucht noch etwas, die Fahrt erscheint gleich in deinem Profil.");run.up=1}}
+ catch(e){btn.disabled=false;const m=String(e.message||e);say(/duplicate/i.test(m)?"Diese Fahrt ist schon auf Strava.":"Hochladen fehlgeschlagen: "+esc(m)+". Du kannst die .tcx-Datei auch selbst hochladen.");if(/duplicate/i.test(m)){btn.textContent="✓ Schon auf Strava";btn.disabled=true}}}
+svCard();svBack();
+
 /* ---------- Fahrt ---------- */
 let wl=null;async function wake(){try{if("wakeLock" in navigator)wl=await navigator.wakeLock.request("screen")}catch(e){}}
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&run&&!run.over)wake()});
@@ -263,7 +295,7 @@ function start(dry){const ftp=+$("#ftp").value;if(!(ftp>=50&&ftp<=600)){toast("B
  if(!W){toast("Bitte eine Einheit wählen.",true);return}
  if(!dry&&!cp){toast("Verbinde zuerst die Rolle oder starte den Probelauf.",true);return}
  run={ftp,dry,t:0,adj:1,paused:false,over:false,rec:[],last:performance.now(),acc:0,started:new Date(),stepI:-1};
- $("#setup").hidden=true;$("#exp").hidden=true;$("#done").hidden=true;$("#ride").hidden=false;$("#rName").textContent=W.name+(dry?" · Probelauf":"");profSvg(W,$("#prof"));
+ $("#setup").hidden=true;$("#exp").hidden=true;$("#svc").hidden=true;$("#done").hidden=true;$("#ride").hidden=false;$("#rName").textContent=W.name+(dry?" · Probelauf":"");profSvg(W,$("#prof"));
  wake();if(!dry){cpw([0x07]);}tick();run.iv=setInterval(tick,250)}
 function curTarget(){const a=pctAt(W,run.t);if(!a)return null;return{...a,w:Math.round(a.p*run.ftp*run.adj)}}
 function sendTarget(force){if(!run||run.dry)return;const c=curTarget();if(!c)return;setPower(run.paused?Math.round(run.ftp*.4):c.w,force)}
@@ -295,11 +327,12 @@ function finish(){if(!run||run.over)return;run.over=true;clearInterval(run.iv);t
  $("#done").innerHTML=`<div class="card"><h2>Geschafft: ${esc(W.name)}</h2><p class="mut">${run.dry?"Probelauf ohne Rolle, die Werte sind leer.":"Das Ziel ist auf 40 % der FTP gesenkt. Rolle locker ausrollen."}</p>
  <div class="sum"><div><b>${mmss(R.length)}</b><span class="mut">Dauer</span></div><div><b>${Math.round(avg)} W</b><span class="mut">Ø Leistung</span></div><div><b>${Math.round(N)} W</b><span class="mut">NP</span></div>
  <div><b>${Math.round(tss)}</b><span class="mut">TSS</span></div><div><b>${ac?Math.round(ac):"–"}</b><span class="mut">Ø Trittfrequenz</span></div><div><b>${ah?Math.round(ah):"–"}</b><span class="mut">Ø Puls</span></div></div>
- <div class="row" style="margin-top:12px">${run.dry?"":`<button id="bTcx">Für Strava speichern (.tcx)</button>`}<button class="g" id="bCsv">Nur für Wattwerk (.csv)</button><button class="g" id="bRaw">Sekundendaten (.csv)</button><button class="g" id="bNew">Neue Einheit</button></div>
- <p class="mut">${run.dry?"":`<b style="color:var(--ink)">Zu Strava:</b> Datei speichern, dann in Chrome strava.com/upload/select öffnen (auf dem Handy im Menü ⋮ „Desktopwebsite“ einschalten), die .tcx-Datei auswählen und als Sportart „Virtuelle Radfahrt“ wählen. Danach holt der Strava-Knopf in Wattwerk die Fahrt automatisch. Die .csv brauchst du dann nicht, sonst steht die Fahrt doppelt im Log. `}Die .csv ist nur für den Fall gedacht, dass die Fahrt nicht zu Strava soll.</p></div>`;
+ <div class="row" style="margin-top:12px">${run.dry?"":svOn()?`<button id="bStr">Zu Strava hochladen</button><button class="g" id="bTcx">.tcx speichern</button>`:`<button id="bTcx">Für Strava speichern (.tcx)</button>`}<button class="g" id="bCsv">Nur für Wattwerk (.csv)</button><button class="g" id="bRaw">Sekundendaten (.csv)</button><button class="g" id="bNew">Neue Einheit</button></div>
+ <p class="mut" id="upInfo"></p><p class="mut">${run.dry||svOn()?"":`<b style="color:var(--ink)">Zu Strava:</b> Datei speichern, dann in Chrome strava.com/upload/select öffnen (auf dem Handy im Menü ⋮ „Desktopwebsite“ einschalten), die .tcx-Datei auswählen und als Sportart „Virtuelle Radfahrt“ wählen. Danach holt der Strava-Knopf in Wattwerk die Fahrt automatisch. Die .csv brauchst du dann nicht, sonst steht die Fahrt doppelt im Log. `}Die .csv ist nur für den Fall gedacht, dass die Fahrt nicht zu Strava soll.</p></div>`;
+ const bu=$("#bStr");if(bu)bu.onclick=()=>svUpload(bu,$("#upInfo"));
  const bt=$("#bTcx");if(bt)bt.onclick=()=>dl(`wattwerk-rolle-${stamp()}.tcx`,tcx(),"application/vnd.garmin.tcx+xml");
  $("#bCsv").onclick=()=>dl(`wattwerk-rolle-${stamp()}.csv`,wwCsv(),"text/csv");$("#bRaw").onclick=()=>dl(`rolle-sekunden-${stamp()}.csv`,rawCsv(),"text/csv");
- $("#bNew").onclick=()=>{$("#done").hidden=true;$("#setup").hidden=false;$("#exp").hidden=false;run=null}}
+ $("#bNew").onclick=()=>{$("#done").hidden=true;$("#setup").hidden=false;$("#exp").hidden=false;$("#svc").hidden=false;run=null}}
 const stamp=()=>{const d=run.started;return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())};
 function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds())}
 function wwCsv(){const s=run.sum;return"Activity ID,Activity Date,Activity Name,Activity Type,Moving Time,Average Watts,Weighted Average Power\n"+[run.started.getTime(),iso(run.started),'"'+("Rolle: "+W.name).replace(/"/g,'""')+'"',"Virtual Ride",s.mv||run.rec.length,Math.round(s.avg),Math.round(s.N)].join(",")+"\n"}
