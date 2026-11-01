@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wattwerk Rolle</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"%3E %3Cdefs%3E %3ClinearGradient id="bg" x1="0" y1="0" x2="0" y2="1"%3E %3Cstop offset="0" stop-color="%231b2835"/%3E %3Cstop offset="1" stop-color="%230e151c"/%3E %3C/linearGradient%3E %3C/defs%3E %3Crect width="512" height="512" fill="url%28%23bg%29"/%3E %3Cg transform="translate%28256 256%29 scale%28.84%29 translate%28-256 -262%29"%3E %3Cpath d="M104 196 L182 368 L256 246 L330 368 L404 150" fill="none" stroke="%23ff6a3d" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/%3E %3Ccircle cx="404" cy="150" r="36" fill="%23ffffff"/%3E %3C/g%3E %3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<meta name="theme-color" content="#0A0E13">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0E13;--sf:#121921;--ink:#EAF0F5;--mut:#8C9AA8;--ac:#FF6A3D;--ln:#1F2A35;--ln2:#2A3744;--ok:#3DDC97;--bad:#FF5A4E;--cy:#5CC8FF;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Barlow,system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1040px;margin:0 auto;padding:16px}
+h1,h2,h3,.num{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;font-weight:700;margin:0}
+h1{font-size:30px}h2{font-size:22px}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:20px;padding:16px;margin:12px 0}
+.card.warn{border-color:var(--bad)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.sp{justify-content:space-between}
+button{font:600 15px Barlow,system-ui,sans-serif;border:0;border-radius:14px;min-height:44px;padding:10px 16px;cursor:pointer;background:var(--ac);color:#0A0E13;transition:transform .1s}
+button:active{transform:scale(.97)}
+button.g{background:none;color:var(--ink);border:1px solid var(--ln2)}
+button:disabled{opacity:.4;cursor:default;transform:none}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+select,input{font:inherit;padding:10px;border-radius:12px;border:1px solid var(--ln2);background:#0D1318;color:var(--ink)}
+label{display:block;font-size:14px;color:var(--mut);margin-bottom:4px}
+input[type=file]::file-selector-button{background:#16212B;color:var(--ink);border:1px solid var(--ln2);border-radius:10px;padding:7px 12px;margin-right:10px;font:600 14px Barlow,system-ui,sans-serif;cursor:pointer}
+.mut{color:var(--mut);font-size:14px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--mut);margin-right:6px;vertical-align:middle}
+.dot.on{background:var(--ok)}
+.dash{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}
+.m{background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:12px 8px;text-align:center}
+.m .num{font-size:52px;line-height:1.05}
+.m .lab{font-size:13px;color:var(--mut)}
+.m.big{grid-column:span 2;grid-row:span 2;display:flex;flex-direction:column;justify-content:center}
+.m.big .num{font-size:120px;line-height:1}
+.m.tgt .num{color:var(--ac)}
+.hi{color:var(--bad)}.lo{color:var(--cy)}
+#prof{width:100%;height:120px;display:block}
+.step{font-size:20px}
+.ctl button{min-width:56px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sum div{background:var(--bg);border-radius:8px;padding:10px;text-align:center}
+.sum b{display:block;font:700 30px "Barlow Condensed",system-ui,sans-serif}
+@media(max-width:700px){.dash{grid-template-columns:repeat(2,1fr)}.m.big .num{font-size:84px}.m .num{font-size:40px}.sum{grid-template-columns:repeat(2,1fr)}}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+#toast.show{opacity:1}#toast.err{background:var(--bad);color:#fff}
+</style></head><body>
+<main>
+<div class="row sp"><h1>Wattwerk Rolle</h1><span class="mut">ERG-Steuerung über Bluetooth (FTMS)</span></div>
+<div id="env"></div>
+<div class="card"><div class="row sp"><h2>Geräte</h2></div>
+ <div class="row" style="margin-top:8px">
+  <button id="bTr">Rolle verbinden</button><span><span class="dot" id="dTr"></span><span id="sTr">nicht verbunden</span></span>
+ </div>
+ <div class="row" style="margin-top:8px">
+  <button class="g" id="bHr">Pulsgurt verbinden (optional)</button><span><span class="dot" id="dHr"></span><span id="sHr">nicht verbunden</span></span>
+ </div>
+</div>
+<div class="card" id="setup">
+ <h2>Einheit wählen</h2>
+ <div class="row" style="margin-top:8px;align-items:flex-end">
+  <div style="flex:2 1 260px"><label for="wsel">Einheit (Plan oder Bibliothek)</label><select id="wsel" style="width:100%"></select></div>
+  <div style="flex:1 1 120px"><label for="ftp">FTP (Watt)</label><input id="ftp" type="number" min="50" max="600" inputmode="numeric" style="width:100%"></div>
+ </div>
+ <div style="margin-top:10px"><label for="plan">Plan aus Wattwerk laden (.json)</label><input id="plan" type="file" accept=".json,application/json"><div class="mut" id="planInfo" style="margin-top:4px"></div></div>
+ <div style="margin-top:10px"><label for="zwo">Oder eine .zwo-Datei laden</label><input id="zwo" type="file" accept=".zwo,.xml,application/xml,text/xml"></div>
+ <div id="pre" style="margin-top:12px"></div>
+ <div class="row" style="margin-top:12px"><button id="bGo">Einheit starten</button><button class="g" id="bDry">Probelauf ohne Rolle</button></div>
+</div>
+<div class="card" id="exp">
+ <h2>Für Garmin und Zwift speichern</h2>
+ <p class="mut" style="margin:6px 0 10px">Speichert die oben gewählte Einheit mit deiner FTP. Garmin: die .fit-Datei per USB in den Ordner GARMIN/NewFiles kopieren. Zwift: die .zwo-Datei in Dokumente/Zwift/Workouts/&lt;deine ID&gt; legen.</p>
+ <div class="row"><button class="g" id="bFit">Garmin (.fit)</button><button class="g" id="bZw">Zwift (.zwo)</button><button class="g" id="bAll" hidden>Ganzen Plan als .fit</button></div>
+</div>
+<div id="ride" hidden>
+ <div class="row sp"><h2 id="rName"></h2><span class="mut" id="rState"></span></div>
+ <div class="dash">
+  <div class="m big"><div class="num" id="vP">–</div><div class="lab">Leistung (W, 3 s)</div></div>
+  <div class="m tgt"><div class="num" id="vT">–</div><div class="lab">Ziel (W)</div></div>
+  <div class="m"><div class="num" id="vS">–</div><div class="lab">Abschnitt noch</div></div>
+  <div class="m"><div class="num" id="vC">–</div><div class="lab">Trittfrequenz</div></div>
+  <div class="m"><div class="num" id="vH">–</div><div class="lab">Puls</div></div>
+ </div>
+ <div class="card"><div class="row sp"><span class="step" id="vStep"></span><span class="mut" id="vNext"></span></div>
+  <svg id="prof" viewBox="0 0 1000 120" preserveAspectRatio="none" role="img" aria-label="Verlauf der Einheit"></svg>
+  <div class="row sp mut"><span id="vEl">0:00</span><span id="vAdj">Intensität 100 %</span><span id="vRem"></span></div>
+ </div>
+ <div class="row ctl">
+  <button id="bPause">Pause</button>
+  <button class="g" id="bDown" aria-label="Intensität 5 Prozent weniger">−5 %</button>
+  <button class="g" id="bUp" aria-label="Intensität 5 Prozent mehr">+5 %</button>
+  <button class="g" id="bSkip">Abschnitt überspringen</button>
+  <button class="g" id="bEnd">Beenden</button>
+ </div>
+ <p class="mut">Tastatur: Leertaste Pause, Pfeil hoch/runter Intensität, Pfeil rechts nächster Abschnitt.</p>
+</div>
+<div id="done" hidden></div>
+<div class="card"><h3>Hinweise</h3>
+ <p class="mut">Die Seite steuert Rollen, die den Bluetooth-Standard FTMS unterstützen. Viele neuere Tacx-Rollen tun das mit aktueller Firmware; prüfe im Zweifel ein Update in der Tacx-App. Erscheint deine Rolle beim Verbinden nicht in der Liste, unterstützt sie FTMS nicht, dann fahre die Einheit über MyWhoosh oder Zwift.</p>
+ <p class="mut">Die Rolle kann immer nur mit einer App verbunden sein. Schließe MyWhoosh, Zwift oder die Tacx-App vorher. Hör im ERG-Modus nicht abrupt auf zu treten: Bei Pause senkt die Seite das Ziel auf 40 % der FTP.</p>
+</div>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+const $=s=>document.querySelector(s);
+const ZC=["#7f93a6","#4a90c2","#3fae7a","#d6b22b","#e8801c","#d6392b","#8e3fbf"];
+const ZB=[0,.55,.75,.9,1.05,1.2,1.5,9];
+const zi=p=>{let i=0;while(i<6&&p>=ZB[i+1])i++;return i};
+const rep=(n,...b)=>Array(n).fill(b).flat();
+const WO=[
+{id:"rec",n:"Regeneration 60 min",b:[[60,.45,.55]]},
+{id:"z2",n:"Grundlage 2 h",s:"locker, Z2",d:"Gleichmäßig locker im Bereich Z2. Du solltest dich dabei noch gut unterhalten können.",b:[[10,.5,.6],[100,.65,.7],[10,.5,.55]]},
+{id:"long",n:"Lange Ausfahrt 3,5 h",s:"gleichmäßig locker, Z2",d:"Gleichmäßig im Bereich Z2, ohne Spitzen. Puls und Atmung bleiben ruhig. Ab Minute 20 regelmäßig essen und trinken. Bei Fahrten über 2,5 h gilt eine Menge von 60 bis 90 g Kohlenhydraten pro Stunde als gängige Empfehlung. Die letzte halbe Stunde nicht schneller werden.",b:[[15,.5,.6],[180,.62,.72],[15,.5,.55]]},
+{id:"longss",n:"Lange Ausfahrt mit Sweetspot 3,5 h",si:5,s:"Z2 mit 2×20 min Sweetspot",d:"Locker einrollen und 1 h Z2 fahren. Dann 2×20 min Sweetspot mit 5 min locker dazwischen. Den Rest locker ausfahren. Die Sweetspot-Blöcke sauber fahren, nicht darüber. Verpflegung wie bei jeder langen Fahrt.",b:[[15,.5,.6],[60,.62,.72],[20,.88,.93],[5,.5,.55],[20,.88,.93],[75,.62,.7],[15,.5,.55]]},
+{id:"longend",n:"Lange Ausfahrt mit Endblock 4 h",s:"Z2, am Ende 2×30 min bei 68–73 % FTP",d:"Locker einrollen und lange im Bereich Z2 fahren. Erst in der letzten Stunde kommen 2×30 min bei 68 bis 73 % der FTP, dazwischen 5 min locker. Ziel: auch müde noch gleichmäßig Leistung bringen, wie am Timmelsjoch. Die Blöcke, wenn möglich, an den letzten Anstieg legen. Ab Minute 20 regelmäßig essen und trinken, die Rennverpflegung üben.",b:[[15,.5,.6],[145,.62,.72],[30,.68,.73],[5,.55,.6],[30,.68,.73],[15,.5,.55]]},
+{id:"longrace",n:"Lange Ausfahrt wettkampfnah 4 h",s:"Z2, am Ende 3×20 min Renntempo",d:"Locker einrollen und lange im Bereich Z2 fahren. Am Ende 3×20 min Renntempo bei 72 bis 78 % der FTP, so wie am Kühtai und Jaufen, dazwischen 5 min locker. Die letzten Blöcke genauso stark fahren wie den ersten. Übe dabei deine Rennverpflegung.",b:[[15,.5,.6],[145,.62,.72],[20,.72,.78],[5,.55,.6],[20,.72,.78],[5,.55,.6],[20,.72,.78],[10,.5,.55]]},
+{id:"tempo",n:"Tempo 2×30 min",b:[[15,.55,.7],[30,.78,.85],[8,.5,.5],[30,.78,.85],[15,.5,.5]]},
+{id:"ss",n:"Sweetspot 3×15 min",b:[[15,.55,.7],[15,.88,.93],[5,.5,.5],[15,.88,.93],[5,.5,.5],[15,.88,.93],[10,.5,.5]]},
+{id:"th",n:"Schwelle 2×20 min",b:[[15,.55,.7],[20,.95,1],[10,.5,.5],[20,.95,1],[15,.5,.5]]},
+{id:"vo2",n:"VO₂max 5×4 min",b:[[15,.55,.7],...rep(5,[4,1.15,1.2],[4,.5,.5]),[10,.5,.5]]},
+{id:"ana",n:"Sprints 8×30 s",b:[[20,.55,.7],...rep(8,[.5,1.6,1.8],[4.5,.5,.5]),[15,.5,.5]]},
+{id:"race",n:"Rennsimulation 90 min",b:[[20,.55,.7],[10,.85,.9],[2,1.2,1.3],[8,.8,.85],[3,1.1,1.2],[10,.9,.95],[1,1.5,1.5],[10,.75,.8],[5,1,1.05],[21,.5,.5]]},
+{id:"vo2b",n:"VO₂max 4×6 min",b:[[15,.55,.7],...rep(4,[6,1.05,1.1],[4,.5,.5]),[10,.5,.5]]},
+{id:"c3015",n:"30/15-Intervalle 3×8",b:[[15,.55,.7],...rep(3,...rep(8,[.5,1.3,1.4],[.25,.5,.5]),[5,.5,.5]),[10,.5,.5]]},
+{id:"ou",n:"Over-Unders 3×12 min",b:[[15,.55,.7],...rep(3,...rep(3,[2,.9,.93],[2,1.02,1.06]),[5,.5,.5]),[10,.5,.5]]},
+{id:"berg",n:"Bergintervalle 4×10 min",b:[[15,.55,.7],...rep(4,[10,.95,1.02],[5,.5,.5]),[10,.5,.5]]},
+{id:"sst",n:"Sweetspot 2×30 min",b:[[15,.55,.7],[30,.88,.93],[8,.5,.5],[30,.88,.93],[10,.5,.5]]},
+{id:"kraft",n:"Kraftausdauer 5×6 min (niedrige Kadenz)",b:[[15,.55,.7],...rep(5,[6,.8,.85],[4,.5,.5]),[10,.5,.5]]},
+{id:"z15",n:"Grundlage 90 min",b:[[10,.5,.6],[70,.65,.7],[10,.5,.55]]},
+{id:"spr",n:"Sprinttraining 6×15 s",b:[[20,.55,.7],...rep(6,[.25,2,2.3],[5,.5,.5]),[10,.5,.5]]},
+{id:"ftp20",n:"FTP-Test 20 min",s:"20 min so hart und gleichmäßig wie möglich",d:"Ausgeruht fahren, deshalb liegt der Test am Ende einer Erholungswoche. 20 min einfahren mit drei kurzen Antritten, 5 min hart, 10 min locker, dann 20 min so gleichmäßig hart, wie du kannst. Nicht zu schnell anfangen. Danach den Durchschnitt der 20 min im Tab Zonen beim 20-Minuten-Test eintragen: FTP = 95 % davon.",b:[[17,.5,.7],[1,1.05,1.1],[1,.5,.5],[1,1.05,1.1],[1,.5,.5],[1,1.05,1.1],[3,.5,.55],[5,1.1,1.2],[10,.5,.55],[20,1,1.08],[10,.5,.55]]},
+{id:"open",n:"Opener 35 min",b:[[15,.55,.65],...rep(3,[1,1.05,1.1],[2,.5,.5]),[11,.5,.55]]},
+{id:"ss2",n:"Sweetspot 3×20 min (2 h)",s:"3×20 min Sweetspot, danach Z2",d:"Einrollen, dann 3×20 min Sweetspot mit 5 min locker dazwischen. Danach noch 25 min locker im Bereich Z2 und ausrollen. Die zusätzliche Grundlage nach den Intervallen trainiert die Ausdauer bei leicht ermüdeten Beinen.",b:[[15,.55,.7],[20,.88,.93],[5,.5,.5],[20,.88,.93],[5,.5,.5],[20,.88,.93],[25,.62,.7],[10,.5,.5]]},
+{id:"th2",n:"Schwelle 3×15 min (2 h)",s:"3×15 min Schwelle, danach Z2",d:"Einrollen, dann 3×15 min an der Schwelle mit 8 min locker dazwischen. Danach gut eine halbe Stunde locker im Bereich Z2 und ausrollen.",b:[[15,.55,.7],[15,.95,1],[8,.5,.5],[15,.95,1],[8,.5,.5],[15,.95,1],[34,.62,.7],[10,.5,.5]]},
+{id:"vo22",n:"VO₂max 5×5 min (2 h)",s:"5×5 min VO₂max, danach Z2",d:"Gut einrollen, dann 5×5 min hart mit je 5 min locker. Danach 40 min locker im Bereich Z2 und ausrollen. Die Intervalle gleichmäßig fahren, das letzte so stark wie das erste.",b:[[20,.55,.7],...rep(5,[5,1.08,1.15],[5,.5,.55]),[40,.62,.7],[10,.5,.5]]},
+{id:"tempo2",n:"Tempo 3×25 min (2 h)",s:"3×25 min Tempo, danach Z2",d:"Einrollen, dann 3×25 min im Tempobereich mit 5 min locker dazwischen. Zum Schluss locker ausfahren. Gut als Vorbereitung auf lange Anstiege im Renntempo.",b:[[15,.55,.7],[25,.78,.85],[5,.55,.6],[25,.78,.85],[5,.55,.6],[25,.78,.85],[20,.6,.68]]}
+];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const mmss=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?h+":"+pad(m)+":"+pad(x):m+":"+pad(x)};
+let tt=0;function toast(m,err){const e=$("#toast");e.textContent=m;e.className=err?"show err":"show";clearTimeout(tt);tt=setTimeout(()=>e.className="",err?4500:2500)}
+const ls={get(k,d){try{const v=localStorage.getItem("wwr."+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem("wwr."+k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- Umgebung ---------- */
+const BT=navigator.bluetooth;
+(function(){let msg="";
+ if(!BT)msg="Dieser Browser kann keine Bluetooth-Geräte ansprechen. Öffne die Datei in Chrome oder Edge unter Windows oder Android. Auf dem iPhone und in Firefox geht das nicht.";
+ else if(window.top!==window)msg="Die Seite läuft eingebettet. Dort ist Bluetooth meist gesperrt. Öffne die Datei direkt in Chrome oder Edge.";
+ if(msg)$("#env").innerHTML=`<div class="card warn"><b>Bluetooth nicht verfügbar.</b><p class="mut" style="margin:6px 0 0">${msg} Den Probelauf ohne Rolle kannst du trotzdem ansehen.</p></div>`;
+ if(!BT){$("#bTr").disabled=true;$("#bHr").disabled=true}})();
+
+/* ---------- Zustand ---------- */
+const D={p:null,c:null,h:null,pt:0,ct:0,ht:0};
+let tr=null,cp=null,hrDev=null,pend=null,cq=Promise.resolve(),range={min:0,max:2000},ctl=false;
+let W=null,run=null;
+
+/* ---------- FTMS ---------- */
+function setTr(on,txt){$("#dTr").className="dot"+(on?" on":"");$("#sTr").textContent=txt}
+function setHr(on,txt){$("#dHr").className="dot"+(on?" on":"");$("#sHr").textContent=txt}
+function cpw(bytes){
+ cq=cq.then(()=>new Promise(res=>{
+  if(!cp){res(false);return}
+  const done=ok=>{if(pend){clearTimeout(pend.to);pend=null}res(ok)};
+  pend={op:bytes[0],done,to:setTimeout(()=>{pend=null;res(false)},3000)};
+  const v=new Uint8Array(bytes);
+  (cp.writeValueWithResponse?cp.writeValueWithResponse(v):cp.writeValue(v)).catch(e=>{done(false)});
+ }));return cq}
+function onCP(e){const v=e.target.value;if(v.byteLength<3||v.getUint8(0)!==0x80||!pend||v.getUint8(1)!==pend.op)return;
+ const r=v.getUint8(2);if(r!==1){const why={2:"nicht unterstützt",3:"ungültiger Wert",4:"fehlgeschlagen",5:"Steuerung nicht erlaubt"}[r]||("Code "+r);toast("Rolle lehnt Befehl ab: "+why,true)}pend.done(r===1)}
+function onIBD(e){const v=e.target.value;if(v.byteLength<2)return;const f=v.getUint16(0,true);let o=2;
+ try{if(!(f&1))o+=2;if(f&2)o+=2;if(f&4){D.c=v.getUint16(o,true)/2;D.ct=Date.now();o+=2}if(f&8)o+=2;if(f&16)o+=3;if(f&32)o+=2;
+  if(f&64){D.p=v.getInt16(o,true);D.pt=Date.now();o+=2}if(f&128)o+=2;if(f&256)o+=5;if(f&512){if(!hrDev){D.h=v.getUint8(o);D.ht=Date.now()}o+=1}}catch(x){}}
+async function connectTr(){
+ try{
+  const dev=await BT.requestDevice({filters:[{services:[0x1826]}],optionalServices:[0x1826]});
+  setTr(false,"verbinde …");
+  dev.addEventListener("gattserverdisconnected",()=>{cp=null;ctl=false;setTr(false,"Verbindung verloren");toast("Rolle getrennt. Verbinde sie neu, die Einheit läuft weiter.",true)});
+  const srv=await dev.gatt.connect(),fm=await srv.getPrimaryService(0x1826);
+  const ibd=await fm.getCharacteristic(0x2AD2);await ibd.startNotifications();ibd.addEventListener("characteristicvaluechanged",onIBD);
+  cp=await fm.getCharacteristic(0x2AD9);cp.addEventListener("characteristicvaluechanged",onCP);await cp.startNotifications();
+  try{const r=await fm.getCharacteristic(0x2AD8),v=await r.readValue();range={min:v.getInt16(0,true),max:v.getInt16(2,true)}}catch(x){}
+  ctl=await cpw([0x00]);await cpw([0x07]);tr=dev;
+  setTr(true,(dev.name||"Rolle")+(ctl?" · ERG bereit":" · nur Anzeige, Steuerung abgelehnt"));
+  if(!ctl)toast("Die Rolle erlaubt keine Steuerung. Ist noch eine andere App verbunden?",true);else toast("Rolle verbunden.");
+  if(run&&!run.paused)sendTarget(true);
+ }catch(e){if(e&&e.name==="NotFoundError")return;setTr(false,"nicht verbunden");toast(e&&e.name==="SecurityError"?"Bluetooth ist hier gesperrt. Öffne die Datei direkt in Chrome oder Edge.":"Verbinden fehlgeschlagen: "+(e&&e.message||e),true)}}
+async function connectHr(){
+ try{const dev=await BT.requestDevice({filters:[{services:[0x180D]}]});setHr(false,"verbinde …");
+  dev.addEventListener("gattserverdisconnected",()=>{hrDev=null;setHr(false,"Verbindung verloren")});
+  const s=await dev.gatt.connect(),sv=await s.getPrimaryService(0x180D),ch=await sv.getCharacteristic(0x2A37);
+  ch.addEventListener("characteristicvaluechanged",e=>{const v=e.target.value,f=v.getUint8(0);D.h=f&1?v.getUint16(1,true):v.getUint8(1);D.ht=Date.now()});
+  await ch.startNotifications();hrDev=dev;setHr(true,dev.name||"Pulsgurt");toast("Pulsgurt verbunden.")
+ }catch(e){if(e&&e.name==="NotFoundError")return;setHr(false,"nicht verbunden");toast("Pulsgurt: "+(e&&e.message||e),true)}}
+let want=null,sending=false,lastSent=null,lastAt=0;
+async function flush(){if(sending||want==null||!cp||!ctl)return;sending=true;const w=want;want=null;
+ const ok=await cpw([0x05,w&255,(w>>8)&255]);if(ok){lastSent=w;lastAt=Date.now()}sending=false;if(want!=null)flush()}
+function setPower(w,force){w=Math.round(Math.max(range.min||0,Math.min(range.max||2000,w)));
+ if(!force&&w===lastSent&&Date.now()-lastAt<10000)return;want=w;flush()}
+
+/* ---------- Einheiten ---------- */
+function fromWattwerk(w){return{name:w.n,steps:w.b.map(([m,lo,hi],i)=>({d:Math.round(m*60),a:lo,b:hi,ramp:i==0&&lo<hi&&w.b.length>1}))}}
+function parseZwo(txt){const x=new DOMParser().parseFromString(txt,"application/xml");if(x.querySelector("parsererror"))throw new Error("Datei nicht lesbar");
+ const wk=x.querySelector("workout");if(!wk)throw new Error("Keine Einheit in der Datei");const n=(x.querySelector("name")||{}).textContent||"Einheit",st=[];
+ const num=(e,a,d)=>{const v=parseFloat(e.getAttribute(a));return isNaN(v)?d:v};
+ for(const e of wk.children){const t=e.tagName,d=num(e,"Duration",0);
+  if(t==="Warmup"||t==="Cooldown"||t==="Ramp"){const lo=num(e,"PowerLow",.5),hi=num(e,"PowerHigh",lo);st.push({d,a:lo,b:hi,ramp:true})}
+  else if(t==="SteadyState"){const p=num(e,"Power",NaN);if(!isNaN(p))st.push({d,a:p,b:p});else st.push({d,a:num(e,"PowerLow",.5),b:num(e,"PowerHigh",.5)})}
+  else if(t==="IntervalsT"){const r=num(e,"Repeat",1),on=num(e,"OnDuration",0),off=num(e,"OffDuration",0),pon=num(e,"OnPower",num(e,"PowerOnHigh",1)),poff=num(e,"OffPower",num(e,"PowerOffLow",.5));for(let i=0;i<r;i++){st.push({d:on,a:pon,b:pon});st.push({d:off,a:poff,b:poff})}}
+  else if(t==="FreeRide"||t==="MaxEffort")st.push({d,a:.5,b:.5,free:true})}
+ const s=st.filter(z=>z.d>0);if(!s.length)throw new Error("Keine Abschnitte gefunden");return{name:n,steps:s}}
+const tot=w=>w.steps.reduce((a,s)=>a+s.d,0);
+const asc=s=>s.normalize("NFD").replace(/₂/g,"2").replace(/×/g,"x").replace(/[^\x20-\x7e]/g,"");
+const fnOf=n=>asc(n).replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"_")||"workout";
+function crc16(u,s,e){const t=[0,0xCC01,0xD801,0x1400,0xF001,0x3C00,0x2800,0xE401,0xA001,0x6C00,0x7800,0xB401,0x5000,0x9C01,0x8801,0x4400];let c=0;for(let i=s;i<e;i++){const b=u[i];let k=t[c&15];c=(c>>4)&0xFFF;c=c^k^t[b&15];k=t[c&15];c=(c>>4)&0xFFF;c=c^k^t[(b>>4)&15]}return c}
+const blocks=w=>w.steps.map(s=>[s.d/60,s.a,s.b]);
+function fitBytes(w,ftp){const B=blocks(w),d=[],u8=v=>d.push(v&255),u16=v=>{u8(v);u8(v>>8)},u32=v=>{u16(v);u16(v>>>16)};
+ const def=(id,gm,f)=>{u8(64|id);u8(0);u8(0);u16(gm);u8(f.length);f.forEach(x=>{u8(x[0]);u8(x[1]);u8(x[2])})};const nm=asc(w.name).slice(0,15);
+ def(0,0,[[0,1,0],[1,2,132],[2,2,132],[3,4,140],[4,4,134]]);u8(0);u8(5);u16(255);u16(0);u32(12345);u32(Math.floor(Date.now()/1000)-631065600);
+ def(1,26,[[4,1,0],[6,2,132],[8,16,7]]);u8(1);u8(2);u16(B.length);for(let i=0;i<16;i++)u8(i<nm.length?nm.charCodeAt(i):0);
+ def(2,27,[[254,2,132],[1,1,0],[2,4,134],[3,1,0],[4,4,134],[5,4,134],[6,4,134],[7,1,0]]);
+ B.forEach(([m,lo,hi],i)=>{let a=lo,b=hi;if(a==b){a*=.97;b*=1.03}const p=(lo+hi)/2;u8(2);u16(i);u8(0);u32(Math.round(m*60000));u8(4);u32(0);u32(Math.round(a*ftp)+1000);u32(Math.round(b*ftp)+1000);u8(i==0&&p<=.7?2:i==B.length-1&&p<=.7?3:p<=.6?1:0)});
+ const n=d.length,u=new Uint8Array(16+n),h=[14,0x20,2132&255,2132>>8,n&255,(n>>8)&255,(n>>16)&255,(n>>24)&255,46,70,73,84];u.set(h);const hc=crc16(u,0,12);u[12]=hc&255;u[13]=hc>>8;u.set(d,14);const fc=crc16(u,0,14+n);u[14+n]=fc&255;u[15+n]=fc>>8;return u}
+function zwoTxt(w){const b=blocks(w),n=b.length,sm=(x,y)=>x[0]==y[0]&&x[1]==y[1]&&x[2]==y[2],pw=x=>((x[1]+x[2])/2).toFixed(2),sec=x=>Math.round(x[0]*60);
+ let s=`<workout_file><author>Wattwerk</author><name>${esc(w.name)}</name><description>Erstellt mit Wattwerk. Leistung relativ zur FTP.</description><sportType>bike</sportType><tags/><workout>`,i=0;
+ while(i<n){if(i+3<n&&sm(b[i],b[i+2])&&sm(b[i+1],b[i+3])){let r=2;while(i+2*r+1<n&&sm(b[i],b[i+2*r])&&sm(b[i+1],b[i+2*r+1]))r++;s+=`<IntervalsT Repeat="${r}" OnDuration="${sec(b[i])}" OnPower="${pw(b[i])}" OffDuration="${sec(b[i+1])}" OffPower="${pw(b[i+1])}"/>`;i+=2*r}
+  else{const x=b[i];s+=i==0&&n>1&&x[1]<x[2]?`<Warmup Duration="${sec(x)}" PowerLow="${x[1].toFixed(2)}" PowerHigh="${x[2].toFixed(2)}"/>`:`<SteadyState Duration="${sec(x)}" Power="${pw(x)}"/>`;i++}}
+ return s+"</workout></workout_file>"}
+function pctAt(w,t){let c=0;for(let i=0;i<w.steps.length;i++){const s=w.steps[i];if(t<c+s.d){const f=(t-c)/s.d;return{i,p:s.ramp?s.a+(s.b-s.a)*f:(s.a+s.b)/2,left:c+s.d-t,s}}c+=s.d}return null}
+function profSvg(w,el){const T=tot(w);let x=0,h="";w.steps.forEach(s=>{const bw=s.d/T*1000,p=s.ramp?(s.a+s.b)/2:(s.a+s.b)/2,y=Math.max(8,Math.min(1,(p-.3)/1.1)*110);
+  h+=s.ramp?`<polygon points="${x.toFixed(1)},120 ${x.toFixed(1)},${(120-Math.max(8,Math.min(1,(s.a-.3)/1.1)*110)).toFixed(1)} ${(x+bw).toFixed(1)},${(120-Math.max(8,Math.min(1,(s.b-.3)/1.1)*110)).toFixed(1)} ${(x+bw).toFixed(1)},120" fill="${ZC[zi(p)]}"/>`:`<rect x="${x.toFixed(1)}" y="${(120-y).toFixed(1)}" width="${Math.max(bw-.8,.8).toFixed(1)}" height="${y.toFixed(1)}" fill="${ZC[zi(p)]}"/>`;x+=bw});
+ el.innerHTML=h+`<rect id="pDone" x="0" y="0" width="0" height="120" fill="#000" opacity=".45"/><line id="pNow" x1="0" x2="0" y1="0" y2="120" stroke="#fff" stroke-width="3"/>`}
+function preview(){const ftp=+$("#ftp").value||250;if(!W){$("#pre").innerHTML="";return}const T=tot(W),avg=W.steps.reduce((a,s)=>a+s.d*(s.a+s.b)/2,0)/T,tss=W.steps.reduce((a,s)=>a+s.d/3600*((s.a+s.b)/2)**2,0)*100;
+ $("#pre").innerHTML=`<div class="row sp"><b>${esc(W.name)}</b><span class="mut">${mmss(T)} · Ø ${Math.round(avg*ftp)} W · ca. ${Math.round(tss)} TSS</span></div><svg id="pv" viewBox="0 0 1000 120" preserveAspectRatio="none" style="width:100%;height:80px;display:block;margin-top:6px"></svg>`;profSvg(W,$("#pv"))}
+let PLAN=ls.get("plan",null);
+const WD=["So","Mo","Di","Mi","Do","Fr","Sa"],pdl=d=>{const x=new Date(d+"T00:00");return isNaN(x)?"":WD[x.getDay()]+" "+x.getDate()+"."+(x.getMonth()+1)+". · "};
+const todayS=()=>{const x=new Date();return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
+function srcW(v){if(String(v).startsWith("p")){const it=PLAN.items[+String(v).slice(1)];return fromWattwerk({n:it.n,b:it.b})}return fromWattwerk(WO[+v])}
+function fillSel(keep){const sel=$("#wsel");let h="";if(PLAN&&PLAN.items.length)h+=`<optgroup label="Dein Plan">${PLAN.items.map((it,i)=>`<option value="p${i}"${it.date&&it.date<todayS()?' class="past"':""}>${pdl(it.date)}${esc(it.n)}</option>`).join("")}</optgroup>`;
+ h+=`<optgroup label="Bibliothek">${WO.map((w,i)=>`<option value="${i}">${esc(w.n)}</option>`).join("")}</optgroup>`;sel.innerHTML=h;
+ let v=keep;if(v==null||!sel.querySelector(`option[value="${v}"]`)){const nx=PLAN&&PLAN.items.findIndex(it=>!it.date||it.date>=todayS());v=nx!=null&&nx>=0?"p"+nx:String(Math.min(+ls.get("wi",0)||0,WO.length-1))}
+ sel.value=String(v);W=srcW(sel.value);$("#bAll").hidden=!(PLAN&&PLAN.items.length>1);
+ $("#planInfo").textContent=PLAN&&PLAN.items.length?`Geladen: ${PLAN.items.length} Einheit${PLAN.items.length>1?"en":""}, erstellt am ${PLAN.created||"?"}.`:"";preview()}
+(function(){const sel=$("#wsel");$("#ftp").value=ls.get("ftp",250);fillSel(ls.get("wsel",null));
+ sel.addEventListener("change",()=>{W=srcW(sel.value);ls.set("wsel",sel.value);if(!sel.value.startsWith("p"))ls.set("wi",+sel.value);$("#zwo").value="";preview()});
+ $("#plan").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const j=JSON.parse(t.replace(/^﻿/,""));if(j.app!=="wattwerk-plan"||!Array.isArray(j.items)||!j.items.every(it=>it&&it.n&&Array.isArray(it.b)&&it.b.length))throw 0;
+   const nd=new Set(j.items.map(it=>it.date||"")),cut=(()=>{const x=new Date();x.setDate(x.getDate()-14);return x.toISOString().slice(0,10)})(),old=(PLAN&&PLAN.items||[]).filter(it=>it.date&&!nd.has(it.date)&&it.date>=cut);PLAN={created:j.created||"",items:[...old,...j.items].sort((a,b)=>(a.date||"9").localeCompare(b.date||"9"))};ls.set("plan",PLAN);if(+j.ftp>=50&&+j.ftp<=600&&+j.ftp!==+$("#ftp").value){$("#ftp").value=Math.round(j.ftp);ls.set("ftp",Math.round(j.ftp))}fillSel(null);toast(j.items.length==1?"Einheit geladen: "+j.items[0].n:"Plan geladen: "+j.items.length+" Einheiten")}catch(x){toast("Das ist keine Plan-Datei aus Wattwerk.",true)}e.target.value=""})});
+ const ftpV=()=>+$("#ftp").value||250;
+ $("#bFit").addEventListener("click",()=>{if(!W)return;if(W.steps.length>50){toast("Zu viele Abschnitte für Garmin (über 50). Nimm die .zwo-Datei.",true);return}dl(fnOf(W.name)+".fit",fitBytes(W,ftpV()),"application/octet-stream")});
+ $("#bZw").addEventListener("click",()=>{if(W)dl(fnOf(W.name)+".zwo",zwoTxt(W),"application/xml")});
+ $("#bAll").addEventListener("click",async()=>{if(!PLAN)return;let n=0,sk=0;for(const it of PLAN.items){const w=fromWattwerk({n:it.n,b:it.b});if(w.steps.length>50){sk++;continue}dl((it.date?it.date+"_":"")+fnOf(it.n)+".fit",fitBytes(w,ftpV()),"application/octet-stream",true);n++;await new Promise(r=>setTimeout(r,450))}toast(n+" .fit-Dateien gespeichert"+(sk?`, ${sk} mit zu vielen Abschnitten übersprungen (dafür .zwo nehmen)`:"")+".")});
+ $("#ftp").addEventListener("change",()=>{const f=+$("#ftp").value;if(f>=50&&f<=600){ls.set("ftp",Math.round(f));preview()}else toast("Bitte eine FTP zwischen 50 und 600 W eingeben.",true)});
+ $("#zwo").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{W=parseZwo(t);preview();toast("Einheit geladen: "+W.name)}catch(x){toast(x.message,true)}})})})();
+
+/* ---------- Fahrt ---------- */
+let wl=null;async function wake(){try{if("wakeLock" in navigator)wl=await navigator.wakeLock.request("screen")}catch(e){}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&run&&!run.over)wake()});
+function start(dry){const ftp=+$("#ftp").value;if(!(ftp>=50&&ftp<=600)){toast("Bitte eine FTP zwischen 50 und 600 W eingeben.",true);return}
+ if(!W){toast("Bitte eine Einheit wählen.",true);return}
+ if(!dry&&!cp){toast("Verbinde zuerst die Rolle oder starte den Probelauf.",true);return}
+ run={ftp,dry,t:0,adj:1,paused:false,over:false,rec:[],last:performance.now(),acc:0,started:new Date(),stepI:-1};
+ $("#setup").hidden=true;$("#exp").hidden=true;$("#done").hidden=true;$("#ride").hidden=false;$("#rName").textContent=W.name+(dry?" · Probelauf":"");profSvg(W,$("#prof"));
+ wake();if(!dry){cpw([0x07]);}tick();run.iv=setInterval(tick,250)}
+function curTarget(){const a=pctAt(W,run.t);if(!a)return null;return{...a,w:Math.round(a.p*run.ftp*run.adj)}}
+function sendTarget(force){if(!run||run.dry)return;const c=curTarget();if(!c)return;setPower(run.paused?Math.round(run.ftp*.4):c.w,force)}
+function tick(){if(!run||run.over)return;const now=performance.now(),dt=(now-run.last)/1000;run.last=now;
+ if(!run.paused){run.t+=dt;run.acc+=dt;while(run.acc>=1){run.acc-=1;const fr=x=>Date.now()-x<3000;run.rec.push([fr(D.pt)?D.p:0,fr(D.ct)?D.c:0,fr(D.ht)?D.h:0])}}
+ const T=tot(W);if(run.t>=T){finish();return}
+ const c=curTarget();if(c.i!==run.stepI){run.stepI=c.i;if(c.i>0&&!run.dry)toast("Nächster Abschnitt: "+Math.round(c.w)+" W")}
+ sendTarget(false);paint(c,T)}
+function paint(c,T){const fr=x=>Date.now()-x<3000,r=run.rec.slice(-3).map(x=>x[0]),p3=r.length?Math.round(r.reduce((a,x)=>a+x,0)/r.length):null;
+ $("#vP").textContent=fr(D.pt)?p3:"–";$("#vT").textContent=run.paused?Math.round(run.ftp*.4):c.w;$("#vS").textContent=mmss(c.left);
+ $("#vC").textContent=fr(D.ct)?Math.round(D.c):"–";$("#vH").textContent=fr(D.ht)?D.h:"–";
+ const dif=fr(D.pt)?p3-c.w:0;$("#vP").className="num"+(fr(D.pt)&&Math.abs(dif)>c.w*.1?(dif>0?" hi":" lo"):"");
+ const s=c.s,lo=Math.round(s.a*run.ftp*run.adj),hi=Math.round(s.b*run.ftp*run.adj);
+ $("#vStep").textContent=`Abschnitt ${c.i+1}/${W.steps.length}: ${s.ramp?lo+" → "+hi:Math.round((s.a+s.b)/2*run.ftp*run.adj)} W, ${mmss(s.d)}${s.free?" (frei)":""}`;
+ const n=W.steps[c.i+1];$("#vNext").textContent=n?`danach ${Math.round((n.ramp?n.a:(n.a+n.b)/2)*run.ftp*run.adj)} W für ${mmss(n.d)}`:"letzter Abschnitt";
+ $("#vEl").textContent=mmss(run.t);$("#vRem").textContent="noch "+mmss(T-run.t);$("#vAdj").textContent="Intensität "+Math.round(run.adj*100)+" %";
+ const x=run.t/T*1000;const pd=$("#pDone"),pn=$("#pNow");if(pd)pd.setAttribute("width",x.toFixed(1));if(pn){pn.setAttribute("x1",x.toFixed(1));pn.setAttribute("x2",x.toFixed(1))}
+ $("#rState").textContent=run.paused?"pausiert":(run.dry?"Probelauf":(ctl?"ERG aktiv":"nur Anzeige"));$("#bPause").textContent=run.paused?"Weiter":"Pause"}
+function pause(){if(!run||run.over)return;run.paused=!run.paused;run.last=performance.now();sendTarget(true);toast(run.paused?"Pausiert, Ziel auf 40 % der FTP gesenkt.":"Weiter geht's.");tick()}
+function adj(d){if(!run||run.over)return;run.adj=Math.max(.5,Math.min(1.3,Math.round((run.adj+d)*100)/100));sendTarget(true);tick()}
+function skip(){if(!run||run.over)return;const c=curTarget();if(c){run.t+=c.left+.01;tick()}}
+function np(a){if(a.length<30)return a.length?a.reduce((x,y)=>x+y,0)/a.length:0;let s=0,n=0,w=0;for(let i=0;i<a.length;i++){w+=a[i];if(i>=30)w-=a[i-30];if(i>=29){s+=Math.pow(w/30,4);n++}}return Math.pow(s/n,.25)}
+function finish(){if(!run||run.over)return;run.over=true;clearInterval(run.iv);try{wl&&wl.release()}catch(e){}
+ if(!run.dry&&cp)setPower(Math.round(run.ftp*.4),true);
+ const R=run.rec,pw=R.map(x=>x[0]),mv=R.filter(x=>x[0]>0||x[1]>0).length,avg=pw.length?pw.reduce((a,b)=>a+b,0)/pw.length:0,N=np(pw),IF=N/run.ftp,tss=R.length/3600*IF*IF*100;
+ const cad=R.filter(x=>x[1]>0),hr=R.filter(x=>x[2]>0),ac=cad.length?cad.reduce((a,x)=>a+x[1],0)/cad.length:0,ah=hr.length?hr.reduce((a,x)=>a+x[2],0)/hr.length:0;
+ run.sum={avg,N,IF,tss,mv,ac,ah};
+ $("#ride").hidden=true;$("#done").hidden=false;
+ $("#done").innerHTML=`<div class="card"><h2>Geschafft: ${esc(W.name)}</h2><p class="mut">${run.dry?"Probelauf ohne Rolle, die Werte sind leer.":"Das Ziel ist auf 40 % der FTP gesenkt. Rolle locker ausrollen."}</p>
+ <div class="sum"><div><b>${mmss(R.length)}</b><span class="mut">Dauer</span></div><div><b>${Math.round(avg)} W</b><span class="mut">Ø Leistung</span></div><div><b>${Math.round(N)} W</b><span class="mut">NP</span></div>
+ <div><b>${Math.round(tss)}</b><span class="mut">TSS</span></div><div><b>${ac?Math.round(ac):"–"}</b><span class="mut">Ø Trittfrequenz</span></div><div><b>${ah?Math.round(ah):"–"}</b><span class="mut">Ø Puls</span></div></div>
+ <div class="row" style="margin-top:12px"><button id="bCsv">Für Wattwerk speichern (.csv)</button><button class="g" id="bRaw">Sekundendaten (.csv)</button><button class="g" id="bNew">Neue Einheit</button></div>
+ <p class="mut">Die Wattwerk-Datei lädst du im Tab „Log“ unter „Strava-Import“ hoch. Wattwerk rechnet den TSS dort mit der NP. Zu Strava gelangt die Fahrt so nicht.</p></div>`;
+ $("#bCsv").onclick=()=>dl(`wattwerk-rolle-${stamp()}.csv`,wwCsv(),"text/csv");$("#bRaw").onclick=()=>dl(`rolle-sekunden-${stamp()}.csv`,rawCsv(),"text/csv");
+ $("#bNew").onclick=()=>{$("#done").hidden=true;$("#setup").hidden=false;$("#exp").hidden=false;run=null}}
+const stamp=()=>{const d=run.started;return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())};
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds())}
+function wwCsv(){const s=run.sum;return"Activity ID,Activity Date,Activity Name,Activity Type,Moving Time,Average Watts,Weighted Average Power\n"+[run.started.getTime(),iso(run.started),'"'+("Rolle: "+W.name).replace(/"/g,'""')+'"',"Virtual Ride",s.mv||run.rec.length,Math.round(s.avg),Math.round(s.N)].join(",")+"\n"}
+function rawCsv(){return"sekunde,watt,trittfrequenz,puls\n"+run.rec.map((r,i)=>[i+1,r[0],Math.round(r[1]),r[2]].join(",")).join("\n")+"\n"}
+function dl(fn,txt,type,quiet){const u=URL.createObjectURL(new Blob([txt],{type}));const a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);if(!quiet)toast("Gespeichert: "+fn)}
+
+$("#bTr").onclick=connectTr;$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);$("#bDry").onclick=()=>start(true);
+$("#bPause").onclick=pause;$("#bUp").onclick=()=>adj(.05);$("#bDown").onclick=()=>adj(-.05);$("#bSkip").onclick=skip;
+$("#bEnd").onclick=()=>{if(run&&!run.over&&confirmEnd())finish()};
+let endArm=0;function confirmEnd(){if(Date.now()-endArm<3000)return true;endArm=Date.now();toast("Nochmal tippen zum Beenden.");return false}
+addEventListener("keydown",e=>{if(!run||run.over||e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;if(e.code==="Space"){e.preventDefault();pause()}else if(e.key==="ArrowUp"){e.preventDefault();adj(.05)}else if(e.key==="ArrowDown"){e.preventDefault();adj(-.05)}else if(e.key==="ArrowRight"){e.preventDefault();skip()}});
+addEventListener("beforeunload",e=>{if(run&&!run.over){e.preventDefault();e.returnValue=""}});
+</script>
+<script>if("serviceWorker" in navigator&&window.isSecureContext)navigator.serviceWorker.register("sw.js").catch(()=>{})</script></body></html>

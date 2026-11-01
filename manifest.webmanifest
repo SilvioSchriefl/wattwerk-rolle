@@ -1,0 +1,26 @@
+{
+ "name": "Wattwerk Rolle",
+ "short_name": "Rolle",
+ "description": "Wattwerk-Einheiten auf der Smart-Rolle fahren und für Garmin/Zwift speichern",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#0A0E13",
+ "theme_color": "#0A0E13",
+ "lang": "de",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  }
+ ]
+}
