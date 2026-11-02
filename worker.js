@@ -1,4 +1,4 @@
-// Wattwerk Rolle – Strava-Vermittler für Cloudflare Workers
+// Wattwerk Ride – Strava-Vermittler für Cloudflare Workers
 // Bewahrt den geheimen Strava-Schlüssel auf und reicht Anmeldung und Upload weiter.
 // Benötigte Variablen (Settings → Variables and Secrets):
 //   STRAVA_CLIENT_ID      – Client-ID deiner Strava-App

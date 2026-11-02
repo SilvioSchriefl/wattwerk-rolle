@@ -1,13 +1,13 @@
-# Wattwerk Rolle
+# Wattwerk Ride
 
-Smart-Trainer-App für Wattwerk: steuert die Rolle per Bluetooth (FTMS/ERG), lädt den Wochenplan aus Wattwerk, speichert Workouts für Garmin (.fit) und Zwift (.zwo) und lädt Fahrten zu Strava hoch.
+Smart-Trainer-App für Wattwerk: steuert die Rolle per Bluetooth (FTMS/ERG), übernimmt Workouts per Link aus Wattwerk, speichert Workouts für Garmin (.fit) und Zwift (.zwo) und lädt Fahrten zu Strava hoch.
 
 App: https://silvioschriefl.github.io/wattwerk-rolle/
 
 ## Automatischer Strava-Upload einrichten
 
 1. **Strava-App anlegen:** strava.com/settings/api
-   - Application Name: Wattwerk Rolle
+   - Application Name: Wattwerk Ride
    - Category: Training
    - Website: https://silvioschriefl.github.io/wattwerk-rolle/
    - Authorization Callback Domain: `silvioschriefl.github.io`

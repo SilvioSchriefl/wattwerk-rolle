@@ -1,7 +1,7 @@
 {
- "name": "Wattwerk Rolle",
- "short_name": "Rolle",
- "description": "Wattwerk-Einheiten auf der Smart-Rolle fahren und für Garmin/Zwift speichern",
+ "name": "Wattwerk Ride",
+ "short_name": "Ride",
+ "description": "Wattwerk-Workouts auf der Smart-Rolle fahren und zu Strava hochladen",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
