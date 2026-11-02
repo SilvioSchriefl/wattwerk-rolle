@@ -121,7 +121,7 @@ button.d{background:none;color:var(--bad);border:1px solid var(--bad)}
 <div class="card" id="setup">
  <div class="row sp" style="flex-wrap:nowrap;align-items:flex-end"><h2 style="margin:0">Deine Einheit</h2><div style="width:104px;flex:none"><label for="ftp">FTP (Watt)</label><input id="ftp" type="number" min="50" max="600" inputmode="numeric" style="width:100%"></div></div>
  <div id="pre" class="selp"></div>
- <div class="row" style="margin-top:12px"><button id="bGo">Einheit starten</button><button class="g" id="bDry">Probelauf ohne Rolle</button></div>
+ <div class="row" style="margin-top:12px"><button id="bGo" style="flex:1">Einheit starten</button></div>
 </div>
 <div class="card" id="lib">
  <div class="seg" id="seg" role="tablist"></div>
@@ -213,7 +213,7 @@ const BT=navigator.bluetooth;
 (function(){let msg="";
  if(!BT)msg="Dieser Browser kann keine Bluetooth-Geräte ansprechen. Öffne die Datei in Chrome oder Edge unter Windows oder Android. Auf dem iPhone und in Firefox geht das nicht.";
  else if(window.top!==window)msg="Die Seite läuft eingebettet. Dort ist Bluetooth meist gesperrt. Öffne die Datei direkt in Chrome oder Edge.";
- if(msg)$("#env").innerHTML=`<div class="card warn"><b>Bluetooth nicht verfügbar.</b><p class="mut" style="margin:6px 0 0">${msg} Den Probelauf ohne Rolle kannst du trotzdem ansehen.</p></div>`;
+ if(msg)$("#env").innerHTML=`<div class="card warn"><b>Bluetooth nicht verfügbar.</b><p class="mut" style="margin:6px 0 0">${msg}</p></div>`;
  if(!BT){$("#bTr").disabled=true;$("#bHr").disabled=true}})();
 
 /* ---------- Zustand ---------- */
@@ -404,7 +404,7 @@ let wl=null;async function wake(){try{if("wakeLock" in navigator)wl=await naviga
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&run&&!run.over)wake()});
 function start(dry){const ftp=+$("#ftp").value;if(!(ftp>=50&&ftp<=600)){toast("Bitte eine FTP zwischen 50 und 600 W eingeben.",true);return}
  if(!W){toast("Bitte eine Einheit wählen.",true);return}
- if(!dry&&!cp){toast("Verbinde zuerst die Rolle oder starte den Probelauf.",true);return}
+ if(!dry&&!cp){toast("Verbinde zuerst die Rolle.",true);return}
  run={ftp,dry,t:0,adj:1,paused:false,over:false,rec:[],last:performance.now(),acc:0,started:new Date(),stepI:-1};
  document.body.classList.add("riding");window.scrollTo(0,0);try{history.pushState({ride:1},"")}catch(x){}$("#setup").hidden=true;$("#exp").hidden=true;$("#svc").hidden=true;$("#done").hidden=true;$("#ride").hidden=false;$("#rName").textContent=W.name+(dry?" · Probelauf":"");profSvg(W,$("#prof"));$("#ride").classList.remove("paused");$("#mS").classList.remove("soon");
  cancelAnimationFrame(RAF);RAF=requestAnimationFrame(anim);
@@ -463,7 +463,7 @@ function rawCsv(){return"sekunde,watt,trittfrequenz,puls\n"+run.rec.map((r,i)=>[
 function dl(fn,txt,type,quiet){const u=URL.createObjectURL(new Blob([txt],{type}));const a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);if(!quiet)toast("Gespeichert: "+fn)}
 
 $("#bTr").onclick=()=>connectTr(false);$("#bRe").onclick=()=>connectTr(false);
-let NOPOP=false;addEventListener("popstate",()=>{if(NOPOP){NOPOP=false;return}if(SHEET){SHEET(null);try{history.pushState({ride:1},"")}catch(x){}return}if(run&&!run.over){try{history.pushState({ride:1},"")}catch(x){}toast("Zum Beenden unten auf „Beenden“ tippen.")}else if(document.body.classList.contains("riding")){const b=$("#bNew");if(b)b.click()}});$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);$("#bDry").onclick=()=>start(true);
+let NOPOP=false;addEventListener("popstate",()=>{if(NOPOP){NOPOP=false;return}if(SHEET){SHEET(null);try{history.pushState({ride:1},"")}catch(x){}return}if(run&&!run.over){try{history.pushState({ride:1},"")}catch(x){}toast("Zum Beenden unten auf „Beenden“ tippen.")}else if(document.body.classList.contains("riding")){const b=$("#bNew");if(b)b.click()}});$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);
 $("#bPause").onclick=pause;$("#bUp").onclick=()=>adj(.05);$("#bDown").onclick=()=>adj(-.05);$("#bSkip").onclick=skip;
 let SHEET=null;function sheet(title,text,btns){if(SHEET)SHEET(null);return new Promise(res=>{const s=$("#sheet");s.querySelector(".box").innerHTML=`<h2>${esc(title)}</h2>${text?`<p class="mut">${esc(text)}</p>`:""}`+btns.map((b,i)=>`<button class="${b.c||""}" data-i="${i}">${esc(b.t)}</button>`).join("");
  SHEET=v=>{s.classList.remove("on");SHEET=null;res(v)};s.querySelectorAll("button").forEach(x=>x.onclick=()=>SHEET&&SHEET(btns[+x.dataset.i].v));s.onclick=e=>{if(e.target===s&&SHEET)SHEET(null)};s.classList.add("on");const f=s.querySelector("button");f&&f.focus({preventScroll:true})})}
