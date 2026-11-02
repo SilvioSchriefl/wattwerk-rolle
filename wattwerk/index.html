@@ -21,7 +21,9 @@ a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;
 </main>
 <script>
 const U=document.getElementById("go").href;
-if(!/[?&]stay\b/.test(location.search))setTimeout(()=>location.replace(U),120);
+const app=["standalone","fullscreen","minimal-ui"].some(m=>matchMedia("(display-mode: "+m+")").matches)||navigator.standalone===true;
+if(app&&!/[?&]stay\b/.test(location.search))setTimeout(()=>location.replace(U),120);
+else document.getElementById("msg").innerHTML="Leg diese Seite in Chrome über <b>⋮ → App installieren</b> auf deinen Startbildschirm.<br>Danach öffnet das Icon direkt Wattwerk.";
 addEventListener("pageshow",e=>{if(e.persisted)document.getElementById("msg").textContent="Tippe auf den Knopf, um Wattwerk zu öffnen."});
 </script>
 </body></html>

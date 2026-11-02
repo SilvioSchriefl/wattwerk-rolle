@@ -21,4 +21,4 @@ Danach erscheint nach jeder Fahrt der Knopf „Zu Strava hochladen“.
 
 ## Wattwerk-Startseite
 
-https://silvioschriefl.github.io/wattwerk-rolle/wattwerk/ ist eine kleine Startseite mit eigenem Icon (Bergprofil). In Chrome mit „App installieren“ auf den Startbildschirm legen; ein Tipp öffnet Wattwerk in claude.ai. Zum Ansehen ohne Weiterleitung `?stay` anhängen.
+https://silvioschriefl.github.io/wattwerk-rolle/wattwerk/ ist eine kleine Startseite mit eigenem Icon (Bergprofil). In Chrome mit „App installieren“ auf den Startbildschirm legen; ein Tipp öffnet Wattwerk in claude.ai. Im normalen Browser-Tab bleibt die Seite stehen, weitergeleitet wird nur aus der installierten App.
