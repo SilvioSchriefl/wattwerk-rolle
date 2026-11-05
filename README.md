@@ -1,6 +1,6 @@
 # Wattwerk Ride
 
-Smart-Trainer-App für Wattwerk: steuert die Rolle per Bluetooth (FTMS/ERG), übernimmt Workouts per Link aus Wattwerk, speichert Workouts für Garmin (.fit) und Zwift (.zwo) und lädt Fahrten zu Strava hoch.
+Smart-Trainer-App für Wattwerk: steuert die Rolle per Bluetooth (FTMS/ERG), übernimmt Workouts per Link aus Wattwerk, speichert Workouts für Garmin (.fit) und Zwift (.zwo), lädt Fahrten zu Strava hoch und speichert sie als .fit für den Import in Garmin Connect.
 
 App: https://silvioschriefl.github.io/wattwerk-rolle/
 
