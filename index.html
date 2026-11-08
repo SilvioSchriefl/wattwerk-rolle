@@ -34,6 +34,7 @@ input[type=file]::file-selector-button{background:#16212B;color:var(--ink);borde
 .m{background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:12px 8px;text-align:center}
 .m .num{font-size:52px;line-height:1.05}
 .m .lab{font-size:13px;color:var(--mut)}
+@media(min-width:701px){.m.w2{grid-column:span 2}}
 .m.big{grid-column:span 2;grid-row:span 2;display:flex;flex-direction:column;justify-content:center}
 .m.big .num{font-size:120px;line-height:1}
 .m.tgt .num{color:var(--ac)}
@@ -144,6 +145,8 @@ button.d{background:none;color:var(--bad);border:1px solid var(--bad)}
   <div class="m" id="mS"><i id="sFill"></i><div class="num" id="vS">–</div><div class="lab">Abschnitt noch</div></div>
   <div class="m"><div class="num" id="vC">–</div><div class="lab">Trittfrequenz</div></div>
   <div class="m"><div class="num" id="vH">–</div><div class="lab">Puls</div></div>
+  <div class="m w2"><div class="num" id="vV">–</div><div class="lab">km/h</div></div>
+  <div class="m w2"><div class="num" id="vD">0,0</div><div class="lab">km</div></div>
  </div>
  <div class="card"><div class="row sp"><span class="step" id="vStep"></span><span class="mut" id="vNext"></span></div>
   <div id="pWrap"><svg id="prof" viewBox="0 0 1000 120" preserveAspectRatio="none" role="img" aria-label="Verlauf der Einheit"></svg><i id="pDot"></i></div>
@@ -207,6 +210,7 @@ const WO=[
 ];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pad=n=>String(n).padStart(2,"0");
+const vOf=p=>{if(!(p>0))return 0;let v=8;for(let k=0;k<20;k++){const f=.21*v*v*v+3.256*v-.975*p,d=.63*v*v+3.256;v-=f/d}return Math.max(0,v)},kmh=v=>(v*3.6).toFixed(1).replace(".",","),kmF=m=>(m/1000).toFixed(1).replace(".",",");
 const mmss=s=>{s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?h+":"+pad(m)+":"+pad(x):m+":"+pad(x)};
 let tt=0;function toast(m,err){const e=$("#toast");e.textContent=m;e.className=err?"show err":"show";clearTimeout(tt);tt=setTimeout(()=>e.className="",err?4500:2500)}
 const ls={get(k,d){try{const v=localStorage.getItem("wwr."+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem("wwr."+k,JSON.stringify(v))}catch(e){}}};
@@ -416,13 +420,13 @@ function start(dry){const ftp=+$("#ftp").value;if(!(ftp>=50&&ftp<=600)){toast("B
 function curTarget(){const a=pctAt(W,run.t);if(!a)return null;return{...a,w:Math.round(a.p*run.ftp*run.adj)}}
 function sendTarget(force){if(!run||run.dry)return;const c=curTarget();if(!c)return;setPower(run.paused?Math.round(run.ftp*.4):c.w,force)}
 function tick(){if(!run||run.over)return;const now=performance.now(),dt=(now-run.last)/1000;run.last=now;
- if(!run.paused){run.t+=dt;run.acc+=dt;while(run.acc>=1){run.acc-=1;const fr=x=>Date.now()-x<3000;const ta=pctAt(W,run.t);run.rec.push([fr(D.pt)?D.p:0,fr(D.ct)?D.c:0,fr(D.ht)?D.h:0,ta?ta.i:-1,ta?Math.round(ta.p*1000)/1000:0])}}
+ if(!run.paused){run.t+=dt;run.acc+=dt;while(run.acc>=1){run.acc-=1;const fr=x=>Date.now()-x<3000;const ta=pctAt(W,run.t);run.rec.push([fr(D.pt)?D.p:0,fr(D.ct)?D.c:0,fr(D.ht)?D.h:0,ta?ta.i:-1,ta?Math.round(ta.p*1000)/1000:0]);const r=run.rec[run.rec.length-1];r[5]=vOf(r[0]);run.dist=(run.dist||0)+r[5]}}
  const T=tot(W);if(run.t>=T){finish();return}
  const c=curTarget();if(c.i!==run.stepI){run.stepI=c.i;if(c.i>0){pop();if(!run.dry)toast("Nächster Abschnitt: "+Math.round(c.w)+" W")}}
  if(!run.half&&run.t>=T/2&&T>=600){run.half=1;if(c.left>3)toast("Halbzeit geschafft.")}
  sendTarget(false);paint(c,T)}
 function paint(c,T){const fr=x=>Date.now()-x<3000,r=run.rec.slice(-3).map(x=>x[0]),p3=r.length?Math.round(r.reduce((a,x)=>a+x,0)/r.length):null;
- $("#vP").textContent=fr(D.pt)?p3:"–";$("#vT").textContent=run.paused?Math.round(run.ftp*.4):c.w;$("#vS").textContent=mmss(c.left);
+ $("#vP").textContent=fr(D.pt)?p3:"–";$("#vV").textContent=fr(D.pt)&&p3>0?kmh(vOf(p3)):"–";$("#vD").textContent=kmF(run.dist||0);$("#vT").textContent=run.paused?Math.round(run.ftp*.4):c.w;$("#vS").textContent=mmss(c.left);
  $("#vC").textContent=fr(D.ct)?Math.round(D.c):"–";$("#vH").textContent=fr(D.ht)?D.h:"–";
  const dif=fr(D.pt)?p3-c.w:0;$("#vP").className="num"+(fr(D.pt)&&Math.abs(dif)>c.w*.1?(dif>0?" hi":" lo"):"");
  const s=c.s,lo=Math.round(s.a*run.ftp*run.adj),hi=Math.round(s.b*run.ftp*run.adj);
@@ -439,11 +443,11 @@ function finish(){if(!run||run.over)return;run.over=true;clearInterval(run.iv);c
  if(!run.dry&&cp)setPower(Math.round(run.ftp*.4),true);
  const R=run.rec,pw=R.map(x=>x[0]),mv=R.filter(x=>x[0]>0||x[1]>0).length,avg=pw.length?pw.reduce((a,b)=>a+b,0)/pw.length:0,N=np(pw),IF=N/run.ftp,tss=R.length/3600*IF*IF*100;
  const cad=R.filter(x=>x[1]>0),hr=R.filter(x=>x[2]>0),ac=cad.length?cad.reduce((a,x)=>a+x[1],0)/cad.length:0,ah=hr.length?hr.reduce((a,x)=>a+x[2],0)/hr.length:0;
- run.sum={avg,N,IF,tss,mv,ac,ah};
+ const dist=R.reduce((a,x)=>a+(x[5]||0),0),vav=R.length?dist/R.length:0;run.sum={avg,N,IF,tss,mv,ac,ah,dist,vav};
  $("#ride").hidden=true;$("#done").hidden=false;
  $("#done").innerHTML=`<div class="card"><svg class="okc" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-15"/></svg><h2>Geschafft: ${esc(W.name)}</h2><p class="mut">${run.dry?"Probelauf ohne Rolle, die Werte sind leer.":"Das Ziel ist auf 40 % der FTP gesenkt. Rolle locker ausrollen."}</p>
  <div class="sum"><div><b>${mmss(R.length)}</b><span class="mut">Dauer</span></div><div><b>${Math.round(avg)} W</b><span class="mut">Ø Leistung</span></div><div><b>${Math.round(N)} W</b><span class="mut">NP</span></div>
- <div><b>${Math.round(tss)}</b><span class="mut">TSS</span></div><div><b>${ac?Math.round(ac):"–"}</b><span class="mut">Ø Trittfrequenz</span></div><div><b>${ah?Math.round(ah):"–"}</b><span class="mut">Ø Puls</span></div></div>
+ <div><b>${Math.round(tss)}</b><span class="mut">TSS</span></div><div><b>${ac?Math.round(ac):"–"}</b><span class="mut">Ø Trittfrequenz</span></div><div><b>${ah?Math.round(ah):"–"}</b><span class="mut">Ø Puls</span></div><div><b>${kmF(run.sum.dist)} km</b><span class="mut">Strecke</span></div><div><b>${kmh(run.sum.vav)}</b><span class="mut">Ø km/h</span></div></div>
  <div class="row" style="margin-top:12px">${run.dry?"":svOn()?`<button id="bStr">Zu Strava &amp; Garmin</button><button class="g" id="bTcx">.tcx speichern</button>`:`<button id="bGfit">Für Strava &amp; Garmin speichern</button>`}<button class="g" id="bCsv">Nur für Wattwerk (.csv)</button><button class="g" id="bRaw">Sekundendaten (.csv)</button><button class="g" id="bNew">Neue Einheit</button><button class="d" id="bDrop">Fahrt verwerfen</button></div>
  <p class="mut" id="upInfo"></p>${run.dry?"":`<div id="shotBox" class="shot"><p class="mut">Bild für Strava wird erstellt …</p></div>`}<p class="mut">${run.dry||svOn()?"":`<b style="color:var(--ink)">Zu Strava:</b> Datei speichern, dann in Chrome strava.com/upload/select öffnen (auf dem Handy im Menü ⋮ „Desktopwebsite“ einschalten), die .fit-Datei auswählen und als Sportart „Virtuelle Radfahrt“ wählen. Danach holt der Strava-Knopf in Wattwerk die Fahrt automatisch. Die .csv brauchst du dann nicht, sonst steht die Fahrt doppelt im Log. `}Die .csv ist nur für den Fall gedacht, dass die Fahrt nicht zu Strava soll.</p>${run.dry?"":`<p class="mut"><b style="color:var(--ink)">Zu Garmin:</b> Der Knopf oben speichert dir auch die .fit-Datei. In Chrome connect.garmin.com/modern/import-data öffnen (auf dem Handy im Menü ⋮ „Desktopwebsite“ einschalten) die Datei aus den Downloads auswählen. Puls, Watt, Trittfrequenz und jedes Intervall als eigene Runde sind enthalten.</p>`}</div>`;
  countUp($("#done"));if(!run.dry)shotMake();const bu=$("#bStr");if(bu)bu.onclick=()=>{saveFit();svUpload(bu,$("#upInfo"))};
@@ -483,7 +487,7 @@ async function shotCanvas(){try{await Promise.race([Promise.all(["700 40px 'Barl
  if(n>1){x.strokeStyle="#fff";x.lineWidth=4;x.lineJoin="round";x.beginPath();bk.forEach((o,k)=>{const px=cx+(k+.5)*bw,py=yv(o.p/ft);k?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()}
  x.fillStyle="#8C9AA8";x.font="400 26px "+BF;for(let i=0;i<5;i++){x.textAlign=i==0?"left":i==4?"right":"center";{const l=mmss(Math.round(n*i/4));x.fillText(n>=3600&&l.split(":").length>2?l.replace(/:\d\d$/,""):n>=3600?"0:"+l.split(":")[0].padStart(2,"0"):l,cx+i/4*cw,cy+ch+40)}}x.textAlign="left";
  const third=s.ah?[Math.round(s.ah)+"","Ø Puls"]:s.ac?[Math.round(s.ac)+"","Ø Trittfrequenz"]:["–","Ø Puls"];
- const st=[[mmss(n),"Dauer"],[Math.round(s.N)+" W","NP"],[Math.round(s.tss)+"","TSS"],[Math.round(s.avg)+" W","Ø Leistung"],[s.IF.toFixed(2).replace(".",","),"IF"],third],gw=(Wd-2*P-48)/3,gh=170;
+ const st=[[mmss(n),"Dauer"],[Math.round(s.N)+" W","NP"],[Math.round(s.tss)+"","TSS"],[Math.round(s.avg)+" W","Ø Leistung"],[kmF(s.dist)+" km","Ø "+kmh(s.vav)+" km/h"],third],gw=(Wd-2*P-48)/3,gh=170;
  st.forEach((v,i)=>{const X=P+(i%3)*(gw+24),Y=800+Math.floor(i/3)*(gh+24);x.fillStyle="#121921";rr(X,Y,gw,gh,26);x.fill();x.strokeStyle="#1F2A35";x.lineWidth=2;x.stroke();
   x.textAlign="center";x.fillStyle=i==1?"#FF6A3D":"#EAF0F5";let f2=70;do{x.font=`700 ${f2}px ${BC}`;f2-=4}while(f2>40&&x.measureText(v[0]).width>gw-24);x.fillText(v[0],X+gw/2,Y+95);x.fillStyle="#8C9AA8";x.font="400 28px "+BF;x.fillText(v[1],X+gw/2,Y+140)});x.textAlign="left";
  const e=evDays();if(e){x.strokeStyle="#FF6A3D";x.lineWidth=7;x.lineJoin="round";x.lineCap="round";x.beginPath();[[P,1255],[P+22,1222],[P+33,1236],[P+50,1205],[P+63,1226],[P+71,1218],[P+80,1255]].forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]));x.stroke();
@@ -501,27 +505,27 @@ function wwCsv(){const s=run.sum;return"Activity ID,Activity Date,Activity Name,
 function saveFit(){if(run&&!run.fitSaved){run.fitSaved=1;dl(`wattwerk-ride-${stamp()}.fit`,actFit(),"application/octet-stream")}}
 function actFit(){const R=run.rec,t0=Math.floor(run.started.getTime()/1000)-631065600,ft=run.ftp,s=run.sum,n=R.length,d=[],u8=v=>d.push(v&255),u16=v=>{u8(v);u8(v>>8)},u32=v=>{u16(v);u16(v>>>16)};
  const def=(id,gm,f)=>{u8(64|id);u8(0);u8(0);u16(gm);u8(f.length);f.forEach(x=>{u8(x[0]);u8(x[1]);u8(x[2])})},b8=v=>v>0?Math.min(254,Math.round(v)):255,b16=v=>v>0?Math.min(65534,Math.round(v)):65535;
- const st=(a,b)=>{const x=R.slice(a,b),p=x.map(r=>r[0]),c=x.filter(r=>r[1]>0),h=x.filter(r=>r[2]>0),avg=g=>g.length?g.reduce((q,r)=>q+r,0)/g.length:0,J=p.reduce((q,r)=>q+r,0);
-  return{dur:b-a,ap:avg(p),mp:Math.max(0,...p),np:np(p),ac:avg(c.map(r=>r[1])),mc:Math.max(0,...c.map(r=>r[1])),ah:avg(h.map(r=>r[2])),mh:Math.max(0,...h.map(r=>r[2])),J,kc:Math.round(J/1000)}};
+ const st=(a,b)=>{const x=R.slice(a,b),p=x.map(r=>r[0]),c=x.filter(r=>r[1]>0),h=x.filter(r=>r[2]>0),avg=g=>g.length?g.reduce((q,r)=>q+r,0)/g.length:0,J=p.reduce((q,r)=>q+r,0),vs=x.map(r=>r[5]||0),dm=vs.reduce((q,r)=>q+r,0);
+  return{dur:b-a,ap:avg(p),mp:Math.max(0,...p),np:np(p),ac:avg(c.map(r=>r[1])),mc:Math.max(0,...c.map(r=>r[1])),ah:avg(h.map(r=>r[2])),mh:Math.max(0,...h.map(r=>r[2])),J,kc:Math.round(J/1000),dm,av:x.length?dm/x.length:0,mv:Math.max(0,...vs)}};
  const L=[];let a=0;for(let i=1;i<=n;i++)if(i===n||R[i][3]!==R[a][3]){if(L.length&&i-a<5&&i<n){continue}L.push([a,i]);a=i}
  if(!L.length)L.push([0,n]);
  const te=t0+n,loc=te-new Date().getTimezoneOffset()*60;
  def(0,0,[[0,1,0],[1,2,132],[2,2,132],[3,4,140],[4,4,134]]);u8(0);u8(4);u16(255);u16(0);u32(run.started.getTime()%4e9>>>0);u32(t0);
  def(1,21,[[253,4,134],[0,1,0],[1,1,0]]);u8(1);u32(t0);u8(0);u8(0);
- def(2,20,[[253,4,134],[7,2,132],[4,1,2],[3,1,2]]);R.forEach((r,i)=>{u8(2);u32(t0+i+1);u16(Math.min(65534,Math.max(0,Math.round(r[0]))));u8(b8(r[1]));u8(b8(r[2]))});
+ def(2,20,[[253,4,134],[5,4,134],[6,2,132],[7,2,132],[4,1,2],[3,1,2]]);let dd=0;R.forEach((r,i)=>{const v=r[5]||0;dd+=v;u8(2);u32(t0+i+1);u32(Math.round(dd*100));u16(Math.min(65534,Math.round(v*1000)));u16(Math.min(65534,Math.max(0,Math.round(r[0]))));u8(b8(r[1]));u8(b8(r[2]))});
  u8(1);u32(te);u8(0);u8(4);
- def(3,19,[[253,4,134],[2,4,134],[7,4,134],[8,4,134],[0,1,0],[1,1,0],[25,1,0],[39,1,0],[19,2,132],[20,2,132],[33,2,132],[17,1,2],[18,1,2],[15,1,2],[16,1,2],[11,2,132],[41,4,134]]);
- L.forEach(([x,y])=>{const q=st(x,y);u8(3);u32(t0+y);u32(t0+x);u32(q.dur*1000);u32(q.dur*1000);u8(9);u8(1);u8(2);u8(6);u16(b16(q.ap));u16(b16(q.mp));u16(b16(q.np));u8(b8(q.ac));u8(b8(q.mc));u8(b8(q.ah));u8(b8(q.mh));u16(q.kc);u32(Math.round(q.J))});
+ def(3,19,[[253,4,134],[2,4,134],[7,4,134],[8,4,134],[0,1,0],[1,1,0],[25,1,0],[39,1,0],[19,2,132],[20,2,132],[33,2,132],[17,1,2],[18,1,2],[15,1,2],[16,1,2],[11,2,132],[41,4,134],[9,4,134],[13,2,132],[14,2,132]]);
+ L.forEach(([x,y])=>{const q=st(x,y);u8(3);u32(t0+y);u32(t0+x);u32(q.dur*1000);u32(q.dur*1000);u8(9);u8(1);u8(2);u8(6);u16(b16(q.ap));u16(b16(q.mp));u16(b16(q.np));u8(b8(q.ac));u8(b8(q.mc));u8(b8(q.ah));u8(b8(q.mh));u16(q.kc);u32(Math.round(q.J));u32(Math.round(q.dm*100));u16(Math.round(q.av*1000));u16(Math.round(q.mv*1000))});
  const S=st(0,n),IF=ft?S.np/ft:0,tss=ft?n/3600*IF*IF*100:0;
- def(4,18,[[253,4,134],[2,4,134],[7,4,134],[8,4,134],[0,1,0],[1,1,0],[5,1,0],[6,1,0],[25,2,132],[26,2,132],[20,2,132],[21,2,132],[34,2,132],[35,2,132],[36,2,132],[45,2,132],[18,1,2],[19,1,2],[16,1,2],[17,1,2],[11,2,132],[48,4,134],[9,4,134]]);
- u8(4);u32(te);u32(t0);u32(n*1000);u32(n*1000);u8(8);u8(1);u8(2);u8(6);u16(0);u16(L.length);u16(b16(S.ap));u16(b16(S.mp));u16(b16(S.np));u16(b16(tss*10));u16(b16(IF*1000));u16(b16(ft));u8(b8(S.ac));u8(b8(S.mc));u8(b8(S.ah));u8(b8(S.mh));u16(S.kc);u32(Math.round(S.J));u32(0);
+ def(4,18,[[253,4,134],[2,4,134],[7,4,134],[8,4,134],[0,1,0],[1,1,0],[5,1,0],[6,1,0],[25,2,132],[26,2,132],[20,2,132],[21,2,132],[34,2,132],[35,2,132],[36,2,132],[45,2,132],[18,1,2],[19,1,2],[16,1,2],[17,1,2],[11,2,132],[48,4,134],[9,4,134],[14,2,132],[15,2,132]]);
+ u8(4);u32(te);u32(t0);u32(n*1000);u32(n*1000);u8(8);u8(1);u8(2);u8(6);u16(0);u16(L.length);u16(b16(S.ap));u16(b16(S.mp));u16(b16(S.np));u16(b16(tss*10));u16(b16(IF*1000));u16(b16(ft));u8(b8(S.ac));u8(b8(S.mc));u8(b8(S.ah));u8(b8(S.mh));u16(S.kc);u32(Math.round(S.J));u32(Math.round(S.dm*100));u16(Math.round(S.av*1000));u16(Math.round(S.mv*1000));
  def(5,34,[[253,4,134],[0,4,134],[1,2,132],[2,1,0],[3,1,0],[4,1,0],[5,4,134]]);u8(5);u32(te);u32(n*1000);u16(1);u8(0);u8(26);u8(1);u32(loc);
  const m=d.length,u=new Uint8Array(16+m),h=[14,0x20,2132&255,2132>>8,m&255,(m>>8)&255,(m>>16)&255,(m>>24)&255,46,70,73,84];u.set(h);const hc=crc16(u,0,12);u[12]=hc&255;u[13]=hc>>8;u.set(d,14);const fc=crc16(u,0,14+m);u[14+m]=fc&255;u[15+m]=fc>>8;return u}
 function tcx(){const R=run.rec,t0=run.started.getTime(),z=ms=>new Date(ms).toISOString().replace(/\.\d{3}Z$/,"Z"),s=run.sum,kj=Math.round(R.reduce((a,x)=>a+x[0],0)/1000),mh=R.reduce((a,x)=>Math.max(a,x[2]),0);
- const tp=R.map((r,i)=>`<Trackpoint><Time>${z(t0+(i+1)*1000)}</Time>${r[2]>0?`<HeartRateBpm><Value>${Math.round(r[2])}</Value></HeartRateBpm>`:""}${r[1]>0?`<Cadence>${Math.min(254,Math.round(r[1]))}</Cadence>`:""}<Extensions><ns3:TPX><ns3:Watts>${Math.round(r[0])}</ns3:Watts></ns3:TPX></Extensions></Trackpoint>`).join("\n");
+ let dd=0;const tp=R.map((r,i)=>{dd+=r[5]||0;return`<Trackpoint><Time>${z(t0+(i+1)*1000)}</Time><DistanceMeters>${dd.toFixed(1)}</DistanceMeters>${r[2]>0?`<HeartRateBpm><Value>${Math.round(r[2])}</Value></HeartRateBpm>`:""}${r[1]>0?`<Cadence>${Math.min(254,Math.round(r[1]))}</Cadence>`:""}<Extensions><ns3:TPX><ns3:Speed>${(r[5]||0).toFixed(2)}</ns3:Speed><ns3:Watts>${Math.round(r[0])}</ns3:Watts></ns3:TPX></Extensions></Trackpoint>`}).join("\n");
  return`<?xml version="1.0" encoding="UTF-8"?>
 <TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:ns3="http://www.garmin.com/xmlschemas/ActivityExtension/v2">
-<Activities><Activity Sport="Biking"><Id>${z(t0)}</Id><Lap StartTime="${z(t0)}"><TotalTimeSeconds>${R.length}</TotalTimeSeconds><DistanceMeters>0</DistanceMeters><Calories>${kj}</Calories>${s.ah?`<AverageHeartRateBpm><Value>${Math.round(s.ah)}</Value></AverageHeartRateBpm><MaximumHeartRateBpm><Value>${Math.round(mh)}</Value></MaximumHeartRateBpm>`:""}<Intensity>Active</Intensity>${s.ac?`<Cadence>${Math.round(s.ac)}</Cadence>`:""}<TriggerMethod>Manual</TriggerMethod><Track>
+<Activities><Activity Sport="Biking"><Id>${z(t0)}</Id><Lap StartTime="${z(t0)}"><TotalTimeSeconds>${R.length}</TotalTimeSeconds><DistanceMeters>${Math.round(s.dist||0)}</DistanceMeters><Calories>${kj}</Calories>${s.ah?`<AverageHeartRateBpm><Value>${Math.round(s.ah)}</Value></AverageHeartRateBpm><MaximumHeartRateBpm><Value>${Math.round(mh)}</Value></MaximumHeartRateBpm>`:""}<Intensity>Active</Intensity>${s.ac?`<Cadence>${Math.round(s.ac)}</Cadence>`:""}<TriggerMethod>Manual</TriggerMethod><Track>
 ${tp}
 </Track></Lap><Notes>${esc("Wattwerk Ride: "+W.name)}</Notes></Activity></Activities></TrainingCenterDatabase>
 `}
