@@ -470,10 +470,12 @@ async function shotCanvas(){try{await Promise.race([Promise.all(["700 40px 'Barl
  x.fillStyle="rgba(255,106,61,.06)";x.beginPath();x.moveTo(0,H);[[0,1180],[160,1080],[300,1150],[470,960],[620,1100],[760,1040],[900,1130],[1080,1050],[1080,H]].forEach(q=>x.lineTo(q[0],q[1]));x.fill();
  x.textBaseline="alphabetic";x.fillStyle="#FF6A3D";x.font="700 34px "+BC;if("letterSpacing" in x)x.letterSpacing="8px";x.fillText("WATTWERK",P,110);if("letterSpacing" in x)x.letterSpacing="0px";
  x.fillStyle="#8C9AA8";x.font="400 32px "+BF;x.textAlign="right";x.fillText(run.started.toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"long",year:"numeric"}),Wd-P,110);x.textAlign="left";
- let fs=92;do{x.font=`700 ${fs}px ${BC}`;fs-=4}while(fs>40&&x.measureText(W.name).width>Wd-2*P);let nm=W.name;while(x.measureText(nm).width>Wd-2*P&&nm.length>4)nm=nm.slice(0,-2);if(nm!==W.name)nm=nm.slice(0,-1)+"…";
- x.fillStyle="#EAF0F5";x.fillText(nm,P,215);
- const ii=ivStats();x.fillStyle="#8C9AA8";x.font="400 34px "+BF;x.fillText(ii?`${ii.label} · Ø ${ii.avg} W`:`Im Schnitt ${Math.round(s.avg/ft*100)} % deiner FTP`,P,268);
- const cx=P,cy=330,cw=Wd-2*P,ch=380;x.fillStyle="rgba(255,255,255,.03)";rr(cx-20,cy-20,cw+40,ch+60,28);x.fill();
+ const mw=Wd-2*P,fw=f=>{x.font=`700 ${f}px ${BC}`;return x.measureText(W.name).width<=mw};let fs=92,ln=[W.name],dy=0;while(fs>64&&!fw(fs))fs-=4;
+ if(!fw(fs)){const wd=W.name.split(/\s+/),two=f=>{x.font=`700 ${f}px ${BC}`;let best=null;for(let k=1;k<wd.length;k++){const a=wd.slice(0,k).join(" "),b=wd.slice(k).join(" "),m=Math.max(x.measureText(a).width,x.measureText(b).width);if(m<=mw&&(!best||m<best.m))best={a,b,m}}return best};
+  fs=72;let b2=two(fs);while(!b2&&fs>44){fs-=4;b2=two(fs)}if(b2){ln=[b2.a,b2.b];dy=Math.round(fs*1.05)}else{x.font=`700 ${fs}px ${BC}`;let nm=W.name;while(x.measureText(nm+"…").width>mw&&nm.length>4)nm=nm.slice(0,-1);ln=[nm+"…"]}}
+ x.font=`700 ${fs}px ${BC}`;x.fillStyle="#EAF0F5";ln.forEach((t,i)=>x.fillText(t,P,215+i*dy));
+ const ii=ivStats();x.fillStyle="#8C9AA8";x.font="400 34px "+BF;x.fillText(ii?`${ii.label} · Ø ${ii.avg} W`:`Im Schnitt ${Math.round(s.avg/ft*100)} % deiner FTP`,P,268+dy);
+ const cx=P,cy=330+dy,cw=Wd-2*P,ch=380-dy;x.fillStyle="rgba(255,255,255,.03)";rr(cx-20,cy-20,cw+40,ch+60,28);x.fill();
  const yv=p=>cy+ch-Math.max(0,Math.min(1,(p-.3)/1.1))*ch,n=R.length,B=Math.max(1,Math.min(n,468)),bw=cw/B,bk=[];
  for(let k=0;k<B;k++){const a=Math.floor(k*n/B),b=Math.max(a+1,Math.floor((k+1)*n/B)),sl=R.slice(a,b);bk.push({p:sl.reduce((q,r)=>q+r[0],0)/sl.length,t:sl.reduce((q,r)=>q+(r[4]||0),0)/sl.length})}
  const mix=h=>{const n=parseInt(h.slice(1),16),b=[0x16,0x1e,0x28];return`rgb(${[n>>16,n>>8&255,n&255].map((v,i)=>Math.round(v*.38+b[i]*.62)).join(",")})`};
