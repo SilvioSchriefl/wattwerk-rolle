@@ -29,7 +29,7 @@ label{display:block;font-size:14px;color:var(--mut);margin-bottom:4px}
 input[type=file]::file-selector-button{background:#16212B;color:var(--ink);border:1px solid var(--ln2);border-radius:10px;padding:7px 12px;margin-right:10px;font:600 14px Barlow,system-ui,sans-serif;cursor:pointer}
 .mut{color:var(--mut);font-size:14px}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--mut);margin-right:6px;vertical-align:middle}
-.dot.on{background:var(--ok)}
+.dot.on{background:var(--ok)}.dot.rc{background:#FFA347;animation:rcb 1s ease-in-out infinite}@keyframes rcb{50%{opacity:.25}}@media (prefers-reduced-motion:reduce){.dot.rc{animation:none}}
 .dash{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}
 .m{background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:12px 8px;text-align:center}
 .m .num{font-size:52px;line-height:1.05}
@@ -136,7 +136,7 @@ button.d{background:none;color:var(--bad);border:1px solid var(--bad)}
  <div class="row"><button class="g" id="bFit">Garmin (.fit)</button><button class="g" id="bZw">Zwift (.zwo)</button><button class="g" id="bAll" hidden>Alle von Wattwerk als .fit</button></div>
 </div>
 <div id="ride" hidden>
- <div class="row sp" style="margin-bottom:6px"><span class="mut"><span class="dot" id="rDot"></span><span id="rTr">Rolle nicht verbunden</span></span><button class="g" id="bRe" hidden>Rolle neu verbinden</button></div>
+ <div class="row sp" style="margin-bottom:6px"><span class="mut" id="rSt"><span class="dot"></span>Rolle nicht verbunden</span><button class="g" id="bRe" hidden>Neu verbinden</button></div>
  <div class="row sp"><h2 id="rName"></h2><span class="mut" id="rState"></span></div>
  <div id="gWrap" role="progressbar" aria-label="Fortschritt der Einheit" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="gBar"><i id="gFill"></i></div><span id="gPct">0 %</span></div>
  <div class="dash">
@@ -230,8 +230,22 @@ const FEC="6e40fec1-b5a3-f393-e0a9-e50e24dcca9e",FEC_RX="6e40fec2-b5a3-f393-e0a9
 let W=null,run=null;
 
 /* ---------- FTMS ---------- */
-function setTr(on,txt){$("#dTr").className="dot"+(on?" on":"");$("#sTr").textContent=txt;const d=$("#rDot");if(d){d.className="dot"+(on?" on":"");$("#rTr").textContent=on?txt:"Rolle "+txt;$("#bRe").hidden=!!on}}
-function setHr(on,txt){$("#dHr").className="dot"+(on?" on":"");$("#sHr").textContent=txt}
+const ST={tr:[false,"nicht verbunden"],hr:[false,"nicht verbunden"]};
+function rideSt(){const el=$("#rSt");if(!el)return;const one=(k,lab)=>{const[on,t]=ST[k],busy=!on&&RC[k].t;return`<span class="dot${on?" on":busy?" rc":""}"></span>${lab}${on?"":" · "+esc(t)}`};
+ const parts=[one("tr","Rolle")];if(hrKnown)parts.push(one("hr","Puls"));el.innerHTML=parts.join('<span style="margin:0 8px;opacity:.5">|</span>');
+ const lost=["tr","hr"].filter(k=>!ST[k][0]&&(k=="tr"||hrKnown)),b=$("#bRe");b.hidden=!lost.length;if(!lost.length)return;b.textContent=lost.some(k=>RC[k].gave||!(k=="tr"?trKnown:hrKnown))?"Gerät neu wählen":RC[lost[0]].t?"Jetzt neu verbinden":"Neu verbinden"}
+function setTr(on,txt){$("#dTr").className="dot"+(on?" on":"");$("#sTr").textContent=txt;ST.tr=[on,txt];rideSt()}
+function setHr(on,txt){$("#dHr").className="dot"+(on?" on":"");$("#sHr").textContent=txt;ST.hr=[on,txt];rideSt()}
+/* automatisches Neu-Verbinden: bekanntes Gerät ohne Auswahlfenster wieder verbinden */
+let trKnown=null,hrKnown=null;const RC={tr:{n:0,t:0,gave:false,busy:false},hr:{n:0,t:0,gave:false,busy:false}};
+function rcStop(k){clearTimeout(RC[k].t);RC[k].t=0;RC[k].n=0;RC[k].gave=false}
+function rcPlan(k,now){const r=RC[k],dev=k=="tr"?trKnown:hrKnown;clearTimeout(r.t);r.t=0;if(!dev)return;
+ if(r.n>=10){r.gave=true;(k=="tr"?setTr:setHr)(false,"nicht erreichbar");return}
+ const ms=now?0:Math.min(8000,1000*Math.pow(1.6,r.n));r.t=setTimeout(()=>rcTry(k),ms);rideSt()}
+async function rcTry(k){const r=RC[k],dev=k=="tr"?trKnown:hrKnown;r.t=0;if(!dev||r.busy)return;if(k=="tr"?tr:hrDev){rcStop(k);return}
+ r.busy=true;(k=="tr"?setTr:setHr)(false,"verbinde neu …");RC[k].t=-1;
+ try{await (k=="tr"?setupTr(dev,true):setupHr(dev,true));rcStop(k);r.busy=false;rideSt()}
+ catch(e){r.busy=false;RC[k].t=0;r.n++;if(dev===(k=="tr"?trKnown:hrKnown))rcPlan(k);}}
 function cpw(bytes){
  cq=cq.then(()=>new Promise(res=>{
   if(!cp){res(false);return}
@@ -254,29 +268,35 @@ async function connectTr(all){
  try{
   const dev=await BT.requestDevice(all===true?{acceptAllDevices:true,optionalServices:[0x1826,FEC,0x1818]}:{filters:[{services:[0x1826]},{namePrefix:"Tacx"},{namePrefix:"NEO"},{namePrefix:"Neo"},{services:[FEC]}],optionalServices:[0x1826,FEC,0x1818]});
   setTr(false,"verbinde …");
-  dev.addEventListener("gattserverdisconnected",()=>{cp=null;ctl=false;setTr(false,"Verbindung verloren");toast("Rolle getrennt. Verbinde sie neu, die Einheit läuft weiter.",true)});
+  if(trKnown&&trKnown!==dev){try{trKnown.gatt.connected&&trKnown.gatt.disconnect()}catch(x){}}rcStop("tr");trKnown=dev;
+  if(!dev._ww){dev._ww=1;dev.addEventListener("gattserverdisconnected",()=>{if(dev!==trKnown)return;const was=!!tr;cp=null;ctl=false;tr=null;setTr(false,"Verbindung verloren");if(was)toast("Rolle getrennt. Ich verbinde sie automatisch neu, die Einheit läuft weiter.",true);rcPlan("tr")})}
+  await setupTr(dev,false);
+ }catch(e){if(e&&e.name==="NotFoundError")return;setTr(false,"nicht verbunden");toast(e&&e.name==="SecurityError"?"Bluetooth ist hier gesperrt. Öffne die Datei direkt in Chrome oder Edge.":"Verbinden fehlgeschlagen: "+(e&&e.message||e),true)}}
+async function setupTr(dev,re){
   const srv=await dev.gatt.connect();let fm=null;try{fm=await srv.getPrimaryService(0x1826)}catch(x){fm=null}
   if(!fm){let fs=null;try{fs=await srv.getPrimaryService(FEC)}catch(x){}if(!fs){let cps=null;try{cps=await srv.getPrimaryService(0x1818)}catch(x){}
-    if(cps){const ch=await cps.getCharacteristic(0x2A63);ch.addEventListener("characteristicvaluechanged",e=>{const v=e.target.value;if(v.byteLength>=4){D.p=v.getInt16(2,true);D.pt=Date.now()}});await ch.startNotifications();proto="cps";cp=null;ctl=false;tr=dev;setTr(true,(dev.name||"Gerät")+" · nur Leistungsanzeige");toast("Verbunden, aber dieses Gerät lässt sich nicht steuern (kein ERG). Gerätename: "+(dev.name||"unbekannt"),true);return}
+    if(cps){const ch=await cps.getCharacteristic(0x2A63);ch.addEventListener("characteristicvaluechanged",e=>{const v=e.target.value;if(v.byteLength>=4){D.p=v.getInt16(2,true);D.pt=Date.now()}});await ch.startNotifications();proto="cps";cp=null;ctl=false;tr=dev;setTr(true,(dev.name||"Gerät")+" · nur Leistungsanzeige");if(re)toast("Wieder verbunden.");else toast("Verbunden, aber dieses Gerät lässt sich nicht steuern (kein ERG). Gerätename: "+(dev.name||"unbekannt"),true);return}
     try{srv.disconnect&&srv.disconnect()}catch(x){}throw new Error("„"+(dev.name||"Gerät")+"“ bietet weder FTMS noch die Tacx-Schnittstelle. Ist es wirklich die Rolle?")}
    proto="fec";const rx=await fs.getCharacteristic(FEC_RX);rx.addEventListener("characteristicvaluechanged",onFEC);await rx.startNotifications();cp=await fs.getCharacteristic(FEC_TX);range={min:0,max:4000};ctl=true;tr=dev;
-   setTr(true,(dev.name||"Tacx")+" · ERG bereit (Tacx-Modus)");toast("Rolle verbunden.");if(run&&!run.paused)sendTarget(true);return}
+   setTr(true,(dev.name||"Tacx")+" · ERG bereit (Tacx-Modus)");toast(re?"Rolle wieder verbunden, ERG läuft weiter.":"Rolle verbunden.");if(run&&!run.paused)sendTarget(true);return}
   proto="ftms";
   const ibd=await fm.getCharacteristic(0x2AD2);await ibd.startNotifications();ibd.addEventListener("characteristicvaluechanged",onIBD);
   cp=await fm.getCharacteristic(0x2AD9);cp.addEventListener("characteristicvaluechanged",onCP);await cp.startNotifications();
   try{const r=await fm.getCharacteristic(0x2AD8),v=await r.readValue();range={min:v.getInt16(0,true),max:v.getInt16(2,true)}}catch(x){}
   ctl=await cpw([0x00]);await cpw([0x07]);tr=dev;
   setTr(true,(dev.name||"Rolle")+(ctl?" · ERG bereit":" · nur Anzeige, Steuerung abgelehnt"));
-  if(!ctl)toast("Die Rolle erlaubt keine Steuerung. Ist noch eine andere App verbunden?",true);else toast("Rolle verbunden.");
+  if(!ctl)toast("Die Rolle erlaubt keine Steuerung. Ist noch eine andere App verbunden?",true);else toast(re?"Rolle wieder verbunden, ERG läuft weiter.":"Rolle verbunden.");
   if(run&&!run.paused)sendTarget(true);
- }catch(e){if(e&&e.name==="NotFoundError")return;setTr(false,"nicht verbunden");toast(e&&e.name==="SecurityError"?"Bluetooth ist hier gesperrt. Öffne die Datei direkt in Chrome oder Edge.":"Verbinden fehlgeschlagen: "+(e&&e.message||e),true)}}
+}
 async function connectHr(){
  try{const dev=await BT.requestDevice({filters:[{services:[0x180D]}]});setHr(false,"verbinde …");
-  dev.addEventListener("gattserverdisconnected",()=>{hrDev=null;setHr(false,"Verbindung verloren")});
-  const s=await dev.gatt.connect(),sv=await s.getPrimaryService(0x180D),ch=await sv.getCharacteristic(0x2A37);
-  ch.addEventListener("characteristicvaluechanged",e=>{const v=e.target.value,f=v.getUint8(0);D.h=f&1?v.getUint16(1,true):v.getUint8(1);D.ht=Date.now()});
-  await ch.startNotifications();hrDev=dev;setHr(true,dev.name||"Pulsgurt");toast("Pulsgurt verbunden.")
+  if(hrKnown&&hrKnown!==dev){try{hrKnown.gatt.connected&&hrKnown.gatt.disconnect()}catch(x){}}rcStop("hr");hrKnown=dev;
+  if(!dev._ww){dev._ww=1;dev.addEventListener("gattserverdisconnected",()=>{if(dev!==hrKnown)return;const was=!!hrDev;hrDev=null;setHr(false,"Verbindung verloren");if(was&&run&&!run.over)toast("Pulsgurt getrennt. Ich verbinde ihn automatisch neu.",true);rcPlan("hr")})}
+  await setupHr(dev,false)
  }catch(e){if(e&&e.name==="NotFoundError")return;setHr(false,"nicht verbunden");toast("Pulsgurt: "+(e&&e.message||e),true)}}
+async function setupHr(dev,re){const s=await dev.gatt.connect(),sv=await s.getPrimaryService(0x180D),ch=await sv.getCharacteristic(0x2A37);
+  if(!ch._ww){ch._ww=1;ch.addEventListener("characteristicvaluechanged",e=>{const v=e.target.value,f=v.getUint8(0);D.h=f&1?v.getUint16(1,true):v.getUint8(1);D.ht=Date.now()})}
+  await ch.startNotifications();hrDev=dev;setHr(true,dev.name||"Pulsgurt");toast(re?"Pulsgurt wieder verbunden.":"Pulsgurt verbunden.")}
 let want=null,sending=false,lastSent=null,lastAt=0;
 async function flush(){if(sending||want==null||!cp||!ctl)return;sending=true;const w=want;want=null;
  const ok=proto==="fec"?await fecw(w):await cpw([0x05,w&255,(w>>8)&255]);if(ok){lastSent=w;lastAt=Date.now()}sending=false;if(want!=null)flush()}
@@ -532,7 +552,8 @@ ${tp}
 function rawCsv(){return"sekunde,watt,trittfrequenz,puls\n"+run.rec.map((r,i)=>[i+1,r[0],Math.round(r[1]),r[2]].join(",")).join("\n")+"\n"}
 function dl(fn,txt,type,quiet){const u=URL.createObjectURL(new Blob([txt],{type}));const a=document.createElement("a");a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);if(!quiet)toast("Gespeichert: "+fn)}
 
-$("#bTr").onclick=()=>connectTr(false);$("#bRe").onclick=()=>connectTr(false);
+$("#bTr").onclick=()=>connectTr(false);$("#bRe").onclick=()=>{const k=!tr?"tr":"hr",dev=k=="tr"?trKnown:hrKnown;
+ if(dev&&!RC[k].gave){RC[k].n=0;rcPlan(k,true);return}if(k=="tr")connectTr(false);else connectHr()};
 let NOPOP=false;addEventListener("popstate",()=>{if(NOPOP){NOPOP=false;return}if(SHEET){SHEET(null);try{history.pushState({ride:1},"")}catch(x){}return}if(run&&!run.over){try{history.pushState({ride:1},"")}catch(x){}toast("Zum Beenden unten auf „Beenden“ tippen.")}else if(document.body.classList.contains("riding")){const b=$("#bNew");if(b)b.click()}});$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);
 $("#bPause").onclick=pause;$("#bUp").onclick=()=>adj(.05);$("#bDown").onclick=()=>adj(-.05);$("#bSkip").onclick=skip;
 let SHEET=null;function sheet(title,text,btns){if(SHEET)SHEET(null);return new Promise(res=>{const s=$("#sheet");s.querySelector(".box").innerHTML=`<h2>${esc(title)}</h2>${text?`<p class="mut">${esc(text)}</p>`:""}`+btns.map((b,i)=>`<button class="${b.c||""}" data-i="${i}">${esc(b.t)}</button>`).join("");
