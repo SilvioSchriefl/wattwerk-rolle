@@ -18,3 +18,9 @@ App: https://silvioschriefl.github.io/wattwerk-rolle/
 3. **In der App:** Karte „Strava verbinden“ → Worker-Adresse (`https://wattwerk-strava.<name>.workers.dev`) und Client-ID eintragen → „Mit Strava verbinden“ → bei Strava „Autorisieren“.
 
 Danach erscheint nach jeder Fahrt der Knopf „Zu Strava hochladen“.
+
+## Vermittler aktualisieren
+
+Wenn sich `worker.js` ändert, muss der Code bei Cloudflare neu eingefügt werden: dash.cloudflare.com → Workers & Pages → `wattwerk-strava` → „Edit code“ → alles durch den neuen Inhalt von `worker.js` ersetzen → Deploy. Die Variablen bleiben erhalten.
+
+Stand November 2026: Der Vermittler verarbeitet die 64-Bit-IDs, die Strava ab 1. Juni 2027 für Aktivitäten und Athleten vergibt.

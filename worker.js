@@ -7,6 +7,27 @@
 
 const STRAVA = "https://www.strava.com";
 
+// Strava vergibt ab 1. Juni 2027 64-Bit-IDs für Aktivitäten und Athleten. Solche Zahlen
+// kann JavaScript nicht exakt darstellen. Deshalb werden IDs vor dem Einlesen in Text
+// umgewandelt, und wo Strava ein *_str-Feld mitliefert, wird dieses verwendet.
+async function readJson(r) {
+  const t = await r.text();
+  try {
+    const d = JSON.parse(t.replace(/("(?:id|activity_id|upload_id|athlete_id)"\s*:\s*)(-?\d+)(?=\s*[,}\]])/g, '$1"$2"'));
+    return fixIds(d);
+  } catch (e) {
+    return {};
+  }
+}
+function fixIds(o) {
+  if (!o || typeof o !== "object") return o;
+  for (const k of Object.keys(o)) {
+    if (k.endsWith("_str") && typeof o[k] === "string" && /^-?\d+$/.test(o[k])) o[k.slice(0, -4)] = o[k];
+    else if (o[k] && typeof o[k] === "object") fixIds(o[k]);
+  }
+  return o;
+}
+
 export default {
   async fetch(req, env) {
     const origin = env.ALLOWED_ORIGIN || "https://silvioschriefl.github.io";
@@ -44,14 +65,14 @@ export default {
           form.set("grant_type", "refresh_token");
         }
         const r = await fetch(STRAVA + "/oauth/token", { method: "POST", body: form });
-        const d = await r.json().catch(() => ({}));
+        const d = await readJson(r);
         if (!r.ok) return json({ error: "strava_auth", status: r.status, detail: d.message || null }, r.status === 400 || r.status === 401 ? 401 : 502);
         return json({
           access_token: d.access_token,
           refresh_token: d.refresh_token,
           expires_at: d.expires_at,
           scope: body.scope || null,
-          athlete: d.athlete ? { id: d.athlete.id, firstname: d.athlete.firstname || "" } : null,
+          athlete: d.athlete ? { id: d.athlete.id != null ? String(d.athlete.id) : null, firstname: d.athlete.firstname || "" } : null,
         });
       }
 
@@ -63,7 +84,7 @@ export default {
         const ct = req.headers.get("Content-Type") || "";
         if (!ct.startsWith("multipart/form-data")) return json({ error: "expected_multipart" }, 400);
         const r = await fetch(STRAVA + "/api/v3/uploads", { method: "POST", headers: { Authorization: auth, "Content-Type": ct }, body: await req.arrayBuffer() });
-        const d = await r.json().catch(() => ({}));
+        const d = await readJson(r);
         return json({ status_code: r.status, ...d }, r.ok ? 200 : r.status === 401 ? 401 : 502);
       }
 
@@ -71,7 +92,7 @@ export default {
         const id = url.searchParams.get("id") || "";
         if (!/^\d+$/.test(id)) return json({ error: "bad_id" }, 400);
         const r = await fetch(STRAVA + "/api/v3/uploads/" + id, { headers: { Authorization: auth } });
-        const d = await r.json().catch(() => ({}));
+        const d = await readJson(r);
         return json({ status_code: r.status, ...d }, r.ok ? 200 : r.status === 401 ? 401 : 502);
       }
 
