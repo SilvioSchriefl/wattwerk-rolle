@@ -123,6 +123,14 @@ button.d{background:none;color:var(--bad);border:1px solid var(--bad)}
 #vw .mut{margin:8px 0 0;font-size:13px;transition:opacity .35s}
 #vw.cl #vwBox{height:0;opacity:0;margin-top:0}#vw.cl .mut{opacity:0;height:0;margin:0;overflow:hidden}
 @media (prefers-reduced-motion:reduce){#scnW,#scnL,#vwBox,#vwPrev{transition:none}}
+/* Live-Coaching */
+#coSet{margin-top:14px}#coSet .chips{margin:8px 0 0;padding:0;flex-wrap:wrap;overflow:visible}#coSet .mut{margin:8px 0 0;font-size:13px}
+.coach{display:flex;gap:12px;align-items:center;background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:12px 14px;margin:10px 0;transition:border-color .3s}
+.coach.al{border-color:var(--ac)}.coach.al .coI{background:color-mix(in srgb,var(--ac) 20%,transparent);color:var(--ac)}
+.coI{width:36px;height:36px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--cy) 16%,transparent);color:var(--cy);transition:background-color .3s,color .3s}
+.coT{min-width:0;flex:1}.coT b{display:block;font:600 20px/1.25 "Barlow Condensed","Arial Narrow",system-ui,sans-serif}.coT span{display:block;font-size:13px;color:var(--mut);margin-top:2px}
+.coD{flex:none;text-align:right;line-height:1.1}.coD b{display:block;font:700 22px/1 "Barlow Condensed","Arial Narrow",system-ui,sans-serif}.coD span{font-size:12px;color:var(--mut)}
+#bSnd[aria-pressed=true]{border-color:var(--ac);color:var(--ac)}
 </style></head><body>
 <main>
 <div class="row sp" id="hdr"><h1>Wattwerk Ride</h1><span class="mut">ERG-Steuerung über Bluetooth</span></div>
@@ -139,6 +147,7 @@ button.d{background:none;color:var(--bad);border:1px solid var(--bad)}
  <div class="row sp" style="flex-wrap:nowrap;align-items:flex-end"><h2 style="margin:0">Deine Einheit</h2><div style="width:104px;flex:none"><label for="ftp">FTP (Watt)</label><input id="ftp" type="number" min="50" max="600" inputmode="numeric" style="width:100%"></div></div>
  <div id="pre" class="selp"></div>
  <div id="vw"><label id="vwLab">Fahransicht</label><div class="seg" id="vwSeg" role="radiogroup" aria-labelledby="vwLab"></div><div id="vwBox"><canvas id="vwPrev" aria-hidden="true"></canvas></div><p class="mut">Während der Fahrt wechselst du die Landschaft durch Wischen über das Bild.</p></div>
+ <div id="coSet"><label id="coLab">Live-Coaching</label><div class="chips" id="coChips" role="group" aria-labelledby="coLab"></div><p class="mut">Töne zählen die letzten 3 Sekunden vor jedem Abschnitt herunter. Ansagen nennen Intervall, Dauer und Watt. Hinweise melden sich bei zu niedriger Trittfrequenz, Puls-Drift und Zeit zum Essen.</p></div>
  <div class="row" style="margin-top:12px"><button id="bGo" style="flex:1">Einheit starten</button></div>
 </div>
 <div class="card" id="lib">
@@ -165,6 +174,7 @@ button.d{background:none;color:var(--bad);border:1px solid var(--bad)}
   <div class="m w2"><div class="num" id="vV">–</div><div class="lab">km/h</div></div>
   <div class="m w2"><div class="num" id="vD">0,0</div><div class="lab">km</div></div>
  </div>
+ <div class="coach" id="coach" aria-live="polite"><div class="coI" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></div><div class="coT"><b id="coT"></b><span id="coS"></span></div><div class="coD" id="coD" hidden><b id="coDv"></b><span>Puls-Drift</span></div></div>
  <div class="card"><div class="row sp"><span class="step" id="vStep"></span><span class="mut" id="vNext"></span></div>
   <div id="pWrap"><svg id="prof" viewBox="0 0 1000 120" preserveAspectRatio="none" role="img" aria-label="Verlauf der Einheit"></svg><i id="pDot"></i></div>
   <div class="row sp mut"><span id="vEl">0:00</span><span id="vAdj">Intensität 100 %</span><span id="vRem"></span></div>
@@ -174,9 +184,10 @@ button.d{background:none;color:var(--bad);border:1px solid var(--bad)}
   <button class="g" id="bDown" aria-label="Intensität 5 Prozent weniger">−5 %</button>
   <button class="g" id="bUp" aria-label="Intensität 5 Prozent mehr">+5 %</button>
   <button class="g" id="bSkip">Abschnitt überspringen</button>
+  <button class="g" id="bSnd" aria-pressed="false">Ton aus</button>
   <button class="g" id="bEnd">Beenden</button>
  </div>
- <p class="mut kbd">Tastatur: Leertaste Pause, Pfeil hoch/runter Intensität, Pfeil rechts nächster Abschnitt.</p>
+ <p class="mut kbd">Tastatur: Leertaste Pause, Pfeil hoch/runter Intensität, Pfeil rechts nächster Abschnitt, M Ton aus/an.</p>
 </div>
 <div id="done" hidden></div>
 <div class="card" id="svc"></div>
@@ -453,15 +464,15 @@ function start(dry){const ftp=+$("#ftp").value;if(!(ftp>=50&&ftp<=600)){toast("B
  run={ftp,dry,t:0,adj:1,paused:false,over:false,rec:[],last:performance.now(),acc:0,started:new Date(),stepI:-1};
  document.body.classList.add("riding");window.scrollTo(0,0);try{history.pushState({ride:1},"")}catch(x){}$("#setup").hidden=true;$("#exp").hidden=true;$("#svc").hidden=true;$("#done").hidden=true;$("#ride").hidden=false;$("#rName").textContent=W.name+(dry?" · Probelauf":"");profSvg(W,$("#prof"));$("#ride").classList.remove("paused");$("#mS").classList.remove("soon");
  cancelAnimationFrame(RAF);RAF=requestAnimationFrame(anim);try{SCN.start()}catch(e){}
- wake();if(!dry&&proto!=="fec"){cpw([0x07]);}tick();run.iv=setInterval(tick,250)}
+ wake();if(!dry&&proto!=="fec"){cpw([0x07]);}coStart();tick();run.iv=setInterval(tick,250)}
 function curTarget(){const a=pctAt(W,run.t);if(!a)return null;return{...a,w:Math.round(a.p*run.ftp*run.adj)}}
 function sendTarget(force){if(!run||run.dry)return;const c=curTarget();if(!c)return;setPower(run.paused?Math.round(run.ftp*.4):c.w,force)}
 function tick(){if(!run||run.over)return;const now=performance.now(),dt=(now-run.last)/1000;run.last=now;
  if(!run.paused){run.t+=dt;run.acc+=dt;while(run.acc>=1){run.acc-=1;const fr=x=>Date.now()-x<3000;const ta=pctAt(W,run.t);run.rec.push([fr(D.pt)?D.p:0,fr(D.ct)?D.c:0,fr(D.ht)?D.h:0,ta?ta.i:-1,ta?Math.round(ta.p*1000)/1000:0]);const r=run.rec[run.rec.length-1];r[5]=vOf(r[0]);run.dist=(run.dist||0)+r[5]}}
  const T=tot(W);if(run.t>=T){finish();return}
- const c=curTarget();if(c.i!==run.stepI){run.stepI=c.i;if(c.i>0){pop();if(!run.dry)toast("Nächster Abschnitt: "+Math.round(c.w)+" W")}}
+ const c=curTarget();if(c.i!==run.stepI){run.stepI=c.i;if(c.i>0){pop();if(!run.dry)toast("Nächster Abschnitt: "+Math.round(c.w)+" W")}if(!run.paused)coStep(c)}
  if(!run.half&&run.t>=T/2&&T>=600){run.half=1;if(c.left>3)toast("Halbzeit geschafft.")}
- sendTarget(false);paint(c,T)}
+ sendTarget(false);paint(c,T);coTick(c,T)}
 function paint(c,T){const fr=x=>Date.now()-x<3000,r=run.rec.slice(-3).map(x=>x[0]),p3=r.length?Math.round(r.reduce((a,x)=>a+x,0)/r.length):null;
  $("#vP").textContent=fr(D.pt)?p3:"–";$("#vV").textContent=fr(D.pt)&&p3>0?kmh(vOf(p3)):"–";$("#vD").textContent=kmF(run.dist||0);$("#vT").textContent=run.paused?Math.round(run.ftp*.4):c.w;$("#vS").textContent=mmss(c.left);
  $("#vC").textContent=fr(D.ct)?Math.round(D.c):"–";$("#vH").textContent=fr(D.ht)?D.h:"–";
@@ -475,12 +486,74 @@ function paint(c,T){const fr=x=>Date.now()-x<3000,r=run.rec.slice(-3).map(x=>x[0
 function pause(){if(!run||run.over)return;run.paused=!run.paused;run.last=performance.now();sendTarget(true);toast(run.paused?"Pausiert, Ziel auf 40 % der FTP gesenkt.":"Weiter geht's.");tick()}
 function adj(d){if(!run||run.over)return;run.adj=Math.max(.5,Math.min(1.3,Math.round((run.adj+d)*100)/100));sendTarget(true);tick()}
 function skip(){if(!run||run.over)return;const c=curTarget();if(c){run.t+=c.left+.01;tick()}}
+
+/* ---------- Live-Coaching ---------- */
+let CS={snd:true,voice:true,hint:true,mute:false,...ls.get("coach",{})},AC=null,DEV=null;
+const csSave=()=>ls.set("coach",CS),SPK="speechSynthesis" in window;
+function deVoice(){if(!SPK)return null;if(DEV)return DEV;const v=speechSynthesis.getVoices();DEV=v.find(x=>/^de(-|_)DE/i.test(x.lang)&&/google|natural|online/i.test(x.name))||v.find(x=>/^de/i.test(x.lang))||null;return DEV}
+if(SPK)try{speechSynthesis.addEventListener("voiceschanged",()=>{DEV=null;deVoice()})}catch(e){}
+function audioOn(){try{if(!AC){const A=window.AudioContext||window.webkitAudioContext;if(A)AC=new A()}if(AC&&AC.state==="suspended")AC.resume()}catch(e){}}
+function beep(f,d,v){if(!CS.snd||CS.mute||!AC)return;try{const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v||.25,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
+function say(t,force){if(!SPK||(!force&&(!CS.voice||CS.mute)))return;try{const u=new SpeechSynthesisUtterance(t);u.lang="de-DE";const v=deVoice();if(v)u.voice=v;u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+const isKraft=()=>!!W&&/niedrige Kadenz|Kraftausdauer/i.test(W.name);
+const stP=s=>s.ramp?(s.a+s.b)/2:(s.a+s.b)/2,isHard=s=>!s.ramp&&stP(s)>=.8&&s.d>=20;
+const sayDur=s=>{s=Math.round(s);if(s<60)return s+" Sekunden";const m=Math.floor(s/60),x=s%60;if(m>=90){const h=Math.floor(m/60),r=m%60;return h+(h==1?" Stunde":" Stunden")+(r?" "+r+" Minuten":"")}return m+(m==1?" Minute":" Minuten")+(x?" "+x+" Sekunden":"")};
+function coStart(){audioOn();if(SPK&&CS.voice&&!CS.mute)try{speechSynthesis.cancel()}catch(e){}const hard=W.steps.map((s,i)=>isHard(s)?i:-1).filter(i=>i>=0);
+ run.co={hard,cd:-1,mid:{},n:0,lowC:0,hiC:0,vlowC:0,offH:0,offL:0,hint:null,saidH:0,hk:{},fuel:0,drift:null,warnD:false,shown:""};$("#coach").hidden=!CS.hint;sndUI()}
+function coHint(key,t,sub,speak,urgent){const co=run.co,now=Date.now();co.hint={key,t,sub,until:now+20000};if(speak&&CS.hint&&(urgent||now-co.saidH>90000)&&now-(co.hk[key]||0)>300000){co.saidH=now;co.hk[key]=now;say(speak)}}
+function coGuide(c){const s=c.s,p=stP(s),w=x=>Math.round(x*run.ftp*run.adj);
+ if(isKraft()&&isHard(s))return["Kraftausdauer: 50 bis 60 U/min","Ruhiger Oberkörper, Druck aus der Hüfte. Nicht unter 45 U/min."];
+ if(s.ramp)return["Einrollen","Langsam steigern bis "+w(s.b)+" W. Trittfrequenz locker 85 bis 95."];
+ if(p<.56)return[c.i>0&&isHard(W.steps[c.i-1]||{})?"Erholung: ganz locker":"Ganz locker","Beine lockern, trinken, Schultern entspannen."];
+ if(p<.76)return["Locker in der Grundlage",ctl?"Ruhig treten, 85 bis 95 U/min. Du solltest noch reden können.":"Grundlage endet bei "+w(.75)+" W. Du solltest noch reden können."];
+ if(p<.9)return[p<.86?"Tempo: gleichmäßig drücken":"Sweetspot: gleichmäßig drücken","Ruhig atmen, 85 bis 95 U/min. Nicht über "+w(s.b)+" W."];
+ if(p<=1.05)return["Schwelle: kontrolliert hart","Gleichmäßig, nicht zu schnell anfangen. Um 90 U/min hilft."];
+ return["Hart! Hohe Trittfrequenz","95 bis 105 U/min, gleichmäßig bis zum Schluss."]}
+function coStep(c){const co=run.co;co.mid={};co.hint=null;co.lowC=co.hiC=co.vlowC=co.offH=co.offL=0;beep(c.i?988:880,.28,.3);if(c.i)setTimeout(()=>beep(1318,.22,.25),160);
+ const s=c.s,pv=W.steps[c.i-1],nx=W.steps[c.i+1],w=Math.round(c.w),short=s.d<45&&(!pv||pv.d<45);if(short)return;
+ const k=co.hard.indexOf(c.i),n=co.hard.length;let t;
+ if(c.i===0)t=`Los geht's. ${s.ramp?"Einrollen":"Erster Abschnitt"}, ${sayDur(s.d)}${s.ramp?"":", "+w+" Watt"}.`;
+ else if(k>=0)t=`${k===n-1&&n>1?"Letztes Intervall":n>1?"Intervall "+(k+1)+" von "+n:"Intervall"}. ${sayDur(s.d)} bei ${w} Watt.${isKraft()?" Fünfzig bis sechzig Umdrehungen.":""}`;
+ else if(!nx)t=`Ausrollen, ${sayDur(s.d)}. Gut gemacht.`;
+ else if(stP(s)<.56)t=`Erholung, ${sayDur(s.d)}. Locker treten.`;
+ else t=`${stP(s)<.76?"Grundlage, ":stP(s)<.9?"Tempo, ":""}${sayDur(s.d)} bei ${w} Watt.`;
+ say(t)}
+function coSec(c){const co=run.co,r=run.rec[run.rec.length-1];if(!r||run.dry)return;const s=c.s,p=stP(s),cad=r[1],pw=r[0],tw=c.w,fr=x=>Date.now()-x<3000;
+ if(fr(D.ct)&&cad>0){
+  if(isKraft()&&isHard(s)){co.hiC=cad>72?co.hiC+1:0;co.vlowC=cad<45?co.vlowC+1:0;
+   if(co.hiC>=10)coHint("khi","Langsamer treten: 50 bis 60 U/min","Gang hoch oder Trittfrequenz senken, die Kraft kommt aus dem Druck.","Langsamer treten. Fünfzig bis sechzig Umdrehungen.");
+   if(co.vlowC>=8)coHint("klo","Nicht unter 45 U/min","Etwas schneller treten, das schont die Knie.","Etwas schneller treten, nicht unter fünfundvierzig.")}
+  else if(ctl&&p>=.85){co.lowC=cad<70?co.lowC+1:0;if(co.lowC>=8)coHint("cad","Trittfrequenz hoch!","Unter 70 U/min kippt das ERG und die Last wird zäh. Ziel 85 bis 95.","Trittfrequenz hoch, sonst kippt das E R G.")}}
+ if(!ctl&&fr(D.pt)&&pw>0&&!s.ramp){const L=run.rec.slice(-15).map(x=>x[0]),av=L.reduce((a,x)=>a+x,0)/L.length,lo=s.a*run.ftp*run.adj*.95,hi=s.b*run.ftp*run.adj*1.05;
+  co.offH=av>hi&&L.length>=15?co.offH+1:0;co.offL=av<lo&&L.length>=15?co.offL+1:0;
+  if(co.offH>=5&&p<.76)coHint("hiE","Etwas zu hart für Grundlage",`Ø ${Math.round(av)} W, Grundlage endet bei ${Math.round(.75*run.ftp*run.adj)} W.`,"Etwas lockerer. Das ist Grundlage.");
+  else if(co.offH>=5&&p>=.9)coHint("hiI","Etwas zu hart, Ziel "+tw+" W",`Ø ${Math.round(av)} W. Lieber gleichmäßig bis zum Ende.`,"Etwas zurücknehmen, sonst fehlt die Kraft am Ende.");
+  else if(co.offL>=5&&p>=.8)coHint("loI","Mehr Druck: Ziel "+tw+" W",`Ø ${Math.round(av)} W in den letzten 15 Sekunden.`,"Etwas mehr Druck, Ziel "+tw+" Watt.")}
+ const T=tot(W),k=Math.floor(run.t/1200);if(T>=4500&&k>co.fuel&&run.t>=1200&&T-run.t>300){co.fuel=k;coHint("fuel"+k,"Essen und trinken","Jetzt etwa 20 bis 30 g Kohlenhydrate und ein paar Schlucke. Das sind 60 bis 90 g pro Stunde.","Zeit zum Essen und Trinken.",true)}
+ if(run.rec.length%30===0)coDrift()}
+function coDrift(){const co=run.co,V=run.rec.filter(r=>r[4]>0&&r[4]<.8&&r[0]>0&&r[2]>40);if(V.length<1800){co.drift=null;return}
+ const ef=a=>{let p=0,h=0;a.forEach(r=>{p+=r[0];h+=r[2]});return h?p/h:0},b=V.slice(600,1500),e0=ef(b),e1=ef(V.slice(-600));if(!e0||!e1){co.drift=null;return}
+ co.drift=Math.round((e0-e1)/e0*1000)/10;if(co.drift>5&&V.length>=2700&&!co.warnD){co.warnD=true;coHint("drift","Puls steigt bei gleicher Leistung",`Puls-Drift ${String(co.drift).replace(".",",")} %. Trinken, ruhig bleiben, nicht schneller werden.`,"Dein Puls steigt bei gleicher Leistung. Trinken und ruhig bleiben.")}}
+function coTick(c,T){const co=run.co;if(!co)return;
+ if(!run.paused&&c.left<=3.2&&c.i<W.steps.length-1&&c.s.d>=8){const sec=Math.ceil(c.left);if(sec>=1&&sec<=3&&co.cd!==c.i*10+sec){co.cd=c.i*10+sec;beep(660,.12,.22)}}
+ if(!run.paused&&isHard(c.s)){const s=c.s;if(s.d>=180&&!co.mid.h&&c.left<=s.d/2){co.mid.h=1;say("Halbzeit. Gleichmäßig bleiben.")}if(s.d>=120&&!co.mid.e&&c.left<=30.5&&c.left>25){co.mid.e=1;say("Noch dreißig Sekunden.")}}
+ if(run.rec.length!==co.n){co.n=run.rec.length;if(!run.paused)coSec(c)}
+ const now=Date.now(),h=co.hint&&co.hint.until>now?co.hint:null,g=run.paused?["Pausiert","Ziel auf 40 % der FTP gesenkt. Weiter mit „Weiter“."]:coGuide(c),k=co.hard.indexOf(c.i);
+ const t=h?h.t:g[0],sub=h?h.sub:(k>=0&&co.hard.length>1?`Intervall ${k+1} von ${co.hard.length} · `:"")+g[1],key=t+"|"+sub+"|"+co.drift;
+ if(key!==co.shown){co.shown=key;$("#coT").textContent=t;$("#coS").textContent=sub;$("#coach").classList.toggle("al",!!h);const d=$("#coD");d.hidden=co.drift==null;if(co.drift!=null){const v=$("#coDv");v.textContent=String(co.drift).replace(".",",")+" %";v.style.color=co.drift>5?"var(--bad)":co.drift>3?"#FFA347":"var(--ok)"}}}
+function sndUI(){const b=$("#bSnd");if(!b)return;b.textContent=CS.mute?"Ton an":"Ton aus";b.setAttribute("aria-pressed",String(!!CS.mute));b.hidden=!(CS.snd||CS.voice)}
+function toggleMute(){CS.mute=!CS.mute;csSave();sndUI();if(CS.mute&&SPK)try{speechSynthesis.cancel()}catch(e){}else{audioOn();beep(880,.15,.2)}toast(CS.mute?"Töne und Ansagen aus.":"Töne und Ansagen an.")}
+function coSetUI(){const el=$("#coChips");if(!el)return;el.innerHTML=[["snd","Töne"],["voice","Sprachansagen"],["hint","Hinweise"]].map(([k,t])=>`<button type="button" data-k="${k}" class="${CS[k]?"on":""}" aria-pressed="${!!CS[k]}">${t}</button>`).join("")+(SPK?`<button type="button" data-k="test">Probe hören</button>`:"")}
+(function(){coSetUI();sndUI();$("#coChips").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.k;
+ if(k==="test"){audioOn();CS.mute=false;csSave();if(CS.snd){beep(660,.12,.22);setTimeout(()=>beep(660,.12,.22),1000);setTimeout(()=>beep(988,.28,.3),2000)}if(CS.voice)setTimeout(()=>say("Intervall zwei von fünf. Vier Minuten bei 290 Watt.",true),CS.snd?2500:0);else if(!CS.snd)toast("Töne und Ansagen sind ausgeschaltet.");return}
+ CS[k]=!CS[k];csSave();coSetUI();sndUI();if(k==="voice"&&!SPK)toast("Dieser Browser kann keine Sprachansagen.",true)})})();
 function np(a){if(a.length<30)return a.length?a.reduce((x,y)=>x+y,0)/a.length:0;let s=0,n=0,w=0;for(let i=0;i<a.length;i++){w+=a[i];if(i>=30)w-=a[i-30];if(i>=29){s+=Math.pow(w/30,4);n++}}return Math.pow(s/n,.25)}
 function finish(){if(!run||run.over)return;run.over=true;clearInterval(run.iv);cancelAnimationFrame(RAF);RAF=0;try{SCN.stop()}catch(e){}try{wl&&wl.release()}catch(e){}
  if(!run.dry&&cp)setPower(Math.round(run.ftp*.4),true);
  const R=run.rec,pw=R.map(x=>x[0]),mv=R.filter(x=>x[0]>0||x[1]>0).length,avg=pw.length?pw.reduce((a,b)=>a+b,0)/pw.length:0,N=np(pw),IF=N/run.ftp,tss=R.length/3600*IF*IF*100;
  const cad=R.filter(x=>x[1]>0),hr=R.filter(x=>x[2]>0),ac=cad.length?cad.reduce((a,x)=>a+x[1],0)/cad.length:0,ah=hr.length?hr.reduce((a,x)=>a+x[2],0)/hr.length:0;
  const dist=R.reduce((a,x)=>a+(x[5]||0),0),vav=R.length?dist/R.length:0;run.sum={avg,N,IF,tss,mv,ac,ah,dist,vav};
+ if(!run.dry){beep(988,.2,.3);setTimeout(()=>beep(1318,.2,.3),180);setTimeout(()=>beep(1760,.35,.3),360);say(`Geschafft. ${sayDur(R.length)}, ${Math.round(N)} Watt normalisiert. Locker ausrollen.`)}
  $("#ride").hidden=true;$("#done").hidden=false;
  $("#done").innerHTML=`<div class="card"><svg class="okc" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-15"/></svg><h2>Geschafft: ${esc(W.name)}</h2><p class="mut">${run.dry?"Probelauf ohne Rolle, die Werte sind leer.":"Das Ziel ist auf 40 % der FTP gesenkt. Rolle locker ausrollen."}</p>
  <div class="sum"><div><b>${mmss(R.length)}</b><span class="mut">Dauer</span></div><div><b>${Math.round(avg)} W</b><span class="mut">Ø Leistung</span></div><div><b>${Math.round(N)} W</b><span class="mut">NP</span></div>
@@ -573,14 +646,14 @@ function dl(fn,txt,type,quiet){const u=URL.createObjectURL(new Blob([txt],{type}
 $("#bTr").onclick=()=>connectTr(false);$("#bRe").onclick=()=>{const k=!tr?"tr":"hr",dev=k=="tr"?trKnown:hrKnown;
  if(dev&&!RC[k].gave){RC[k].n=0;rcPlan(k,true);return}if(k=="tr")connectTr(false);else connectHr()};
 let NOPOP=false;addEventListener("popstate",()=>{if(NOPOP){NOPOP=false;return}if(SHEET){SHEET(null);try{history.pushState({ride:1},"")}catch(x){}return}if(run&&!run.over){try{history.pushState({ride:1},"")}catch(x){}toast("Zum Beenden unten auf „Beenden“ tippen.")}else if(document.body.classList.contains("riding")){const b=$("#bNew");if(b)b.click()}});$("#bHr").onclick=connectHr;$("#bGo").onclick=()=>start(false);
-$("#bPause").onclick=pause;$("#bUp").onclick=()=>adj(.05);$("#bDown").onclick=()=>adj(-.05);$("#bSkip").onclick=skip;
+$("#bPause").onclick=pause;$("#bUp").onclick=()=>adj(.05);$("#bDown").onclick=()=>adj(-.05);$("#bSkip").onclick=skip;$("#bSnd").onclick=toggleMute;
 let SHEET=null;function sheet(title,text,btns){if(SHEET)SHEET(null);return new Promise(res=>{const s=$("#sheet");s.querySelector(".box").innerHTML=`<h2>${esc(title)}</h2>${text?`<p class="mut">${esc(text)}</p>`:""}`+btns.map((b,i)=>`<button class="${b.c||""}" data-i="${i}">${esc(b.t)}</button>`).join("");
  SHEET=v=>{s.classList.remove("on");SHEET=null;res(v)};s.querySelectorAll("button").forEach(x=>x.onclick=()=>SHEET&&SHEET(btns[+x.dataset.i].v));s.onclick=e=>{if(e.target===s&&SHEET)SHEET(null)};s.classList.add("on");const f=s.querySelector("button");f&&f.focus({preventScroll:true})})}
-function discard(){if(!run||run.over)return;run.over=true;clearInterval(run.iv);cancelAnimationFrame(RAF);RAF=0;try{SCN.stop()}catch(e){}try{wl&&wl.release()}catch(e){}if(!run.dry&&cp)setPower(Math.round(run.ftp*.4),true);
+function discard(){if(!run||run.over)return;run.over=true;if(SPK)try{speechSynthesis.cancel()}catch(e){}clearInterval(run.iv);cancelAnimationFrame(RAF);RAF=0;try{SCN.stop()}catch(e){}try{wl&&wl.release()}catch(e){}if(!run.dry&&cp)setPower(Math.round(run.ftp*.4),true);
  $("#ride").hidden=true;$("#setup").hidden=false;$("#exp").hidden=false;$("#svc").hidden=false;run=null;document.body.classList.remove("riding");window.scrollTo(0,0);if(history.state&&history.state.ride){NOPOP=true;history.back()}toast("Einheit verworfen.")}
 $("#bEnd").onclick=async()=>{if(!run||run.over)return;const v=await sheet("Einheit beenden?",`Bisher ${mmss(run.rec.length)} gefahren.`,[{t:"Beenden und auswerten",v:"end"},{t:"Einheit verwerfen",c:"d",v:"drop"},{t:"Weiterfahren",c:"g",v:null}]);if(!run||run.over)return;
  if(v==="end")finish();else if(v==="drop"){const w=await sheet("Wirklich verwerfen?","Die Fahrt wird nicht gespeichert und nicht hochgeladen.",[{t:"Verwerfen",c:"d",v:1},{t:"Weiterfahren",c:"g",v:0}]);if(w&&run&&!run.over)discard()}};
-addEventListener("keydown",e=>{if(SHEET){if(e.key==="Escape"){e.preventDefault();SHEET(null)}return}if(!run||run.over||e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;if(e.code==="Space"){e.preventDefault();pause()}else if(e.key==="ArrowUp"){e.preventDefault();adj(.05)}else if(e.key==="ArrowDown"){e.preventDefault();adj(-.05)}else if(e.key==="ArrowRight"){e.preventDefault();skip()}});
+addEventListener("keydown",e=>{if(SHEET){if(e.key==="Escape"){e.preventDefault();SHEET(null)}return}if(!run||run.over||e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;if(e.code==="Space"){e.preventDefault();pause()}else if(e.key==="ArrowUp"){e.preventDefault();adj(.05)}else if(e.key==="ArrowDown"){e.preventDefault();adj(-.05)}else if(e.key==="ArrowRight"){e.preventDefault();skip()}else if(e.key==="m"||e.key==="M"){e.preventDefault();toggleMute()}});
 addEventListener("beforeunload",e=>{if(run&&!run.over){e.preventDefault();e.returnValue=""}});
 </script>
 <script>
